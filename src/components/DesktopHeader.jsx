@@ -1,8 +1,9 @@
 import React from 'react';
 import { 
-  Sparkles, Key, Lock, Minus, Square, X, ShieldCheck, 
-  HelpCircle, Settings, Laptop, Layers 
+  Key, Minus, Square, X, ShieldCheck, 
+  Settings, HelpCircle, HardDrive
 } from 'lucide-react';
+import ClockLogo from './ClockLogo';
 
 export default function DesktopHeader({ 
   isPro, 
@@ -11,38 +12,44 @@ export default function DesktopHeader({
   onOpenSettingsModal 
 }) {
   return (
-    <header className="h-10 bg-[#0d121d] border-b border-studio-border flex items-center justify-between px-3 select-none text-xs">
+    <header className="h-10 bg-[#09090b] border-b border-[#222226] flex items-center justify-between px-3 select-none text-xs text-neutral-300">
       
       {/* Left: Window Menu & Brand */}
       <div className="flex items-center gap-3">
         {/* Custom Window Dots */}
-        <div className="flex items-center gap-1.5 pr-2 border-r border-studio-border">
-          <div className="w-3 h-3 rounded-full bg-rose-500/80 hover:bg-rose-500 cursor-pointer"></div>
-          <div className="w-3 h-3 rounded-full bg-amber-500/80 hover:bg-amber-500 cursor-pointer"></div>
-          <div className="w-3 h-3 rounded-full bg-emerald-500/80 hover:bg-emerald-500 cursor-pointer"></div>
+        <div className="flex items-center gap-1.5 pr-2.5 border-r border-[#222226]">
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-700 hover:bg-rose-500 transition-colors cursor-pointer" title="Tutup"></div>
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-700 hover:bg-amber-500 transition-colors cursor-pointer" title="Perkecil"></div>
+          <div className="w-2.5 h-2.5 rounded-full bg-neutral-700 hover:bg-emerald-500 transition-colors cursor-pointer" title="Perbesar"></div>
         </div>
 
-        {/* Brand Logo */}
+        {/* Brand Logo with Clock Icon (Kuning Menuju Gelap) */}
         <div className="flex items-center gap-2">
-          <div className="w-5 h-5 rounded-md bg-[#ff5429] flex items-center justify-center font-black text-[10px] text-white">
-            Q
-          </div>
-          <span className="font-extrabold text-sm tracking-tight text-white">
-            quantum<span className="text-[#ff5429]">.</span>
+          <ClockLogo size={20} />
+          <span className="font-extrabold text-[13px] tracking-tight text-white">
+            Quantum<span className="text-[#facc15] font-light">Studio</span>
           </span>
-          <span className="text-[10px] font-mono text-slate-400 bg-studio-panel px-1.5 py-0.5 rounded border border-studio-border">
-            v1.0.0-beta
+          <span className="text-[10px] font-mono text-neutral-400 bg-[#121216] px-1.5 py-0.5 rounded border border-[#27272a]">
+            v1.0.0
           </span>
         </div>
 
-        {/* Studio Quick Menus */}
-        <div className="hidden sm:flex items-center gap-3 text-slate-400 text-[11px] font-medium ml-2">
-          <span className="hover:text-white cursor-pointer transition-colors">File</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Edit</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Timeline</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Agent</span>
-          <span className="hover:text-white cursor-pointer transition-colors">Export</span>
+        {/* Studio Quick Menus (After Effects / CapCut Desktop Style) */}
+        <div className="hidden md:flex items-center gap-3 text-neutral-400 text-[11px] font-medium ml-2">
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">File</span>
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Edit</span>
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Composition</span>
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Timeline</span>
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">View</span>
+          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Help</span>
         </div>
+      </div>
+
+      {/* Center: Current Project Info */}
+      <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono text-neutral-400 bg-[#121216] px-3 py-1 rounded-md border border-[#222226]">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        <span className="text-neutral-200">BrandIntro_4K_60FPS.qtm</span>
+        <span className="text-neutral-500">(Tersimpan Lokal)</span>
       </div>
 
       {/* Right: License Status & Actions */}
@@ -50,38 +57,41 @@ export default function DesktopHeader({
         
         {/* License Pill Indicator */}
         {isPro ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/40 text-emerald-400 font-bold text-[10px]">
-            <ShieldCheck className="w-3 h-3" />
-            <span>PRO LIFETIME ACTIVE</span>
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#121216] border border-emerald-500/30 text-emerald-400 font-bold text-[10px]">
+            <ShieldCheck className="w-3 h-3 text-emerald-400" />
+            <span>PRO LIFETIME</span>
           </div>
         ) : (
           <button
+            type="button"
             onClick={onOpenLicenseModal}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-orange-950/50 hover:bg-orange-900/60 border border-[#ff5429]/40 text-[#ff5429] font-bold text-[10px] transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#18181b] hover:bg-[#27272a] border border-[#27272a] text-neutral-200 font-semibold text-[11px] transition-colors cursor-pointer"
           >
-            <Sparkles className="w-3 h-3 text-[#ff5429]" />
-            <span>Upgrade to Pro</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#facc15]"></span>
+            <span>Aktivasi Pro</span>
           </button>
         )}
 
         {/* Settings BYOA */}
         <button
+          type="button"
           onClick={onOpenSettingsModal}
-          title="Konfigurasi API Key & Local Ollama"
-          className="p-1.5 rounded-lg bg-studio-panel hover:bg-slate-800 text-slate-300 border border-studio-border transition-colors cursor-pointer"
+          title="Konfigurasi Kunci API (BYOA) & Ollama"
+          className="p-1.5 rounded-md bg-[#121216] hover:bg-[#1f1f23] text-neutral-300 border border-[#27272a] transition-colors cursor-pointer"
+          aria-label="Pengaturan API Keys"
         >
           <Settings className="w-3.5 h-3.5" />
         </button>
 
         {/* Window Controls */}
-        <div className="flex items-center text-slate-400 pl-2 border-l border-studio-border">
-          <button className="p-1 hover:text-white hover:bg-slate-800 rounded">
+        <div className="flex items-center text-neutral-400 pl-2 border-l border-[#222226]">
+          <button className="p-1 hover:text-white hover:bg-[#18181b] rounded" aria-label="Minimize">
             <Minus className="w-3 h-3" />
           </button>
-          <button className="p-1 hover:text-white hover:bg-slate-800 rounded">
+          <button className="p-1 hover:text-white hover:bg-[#18181b] rounded" aria-label="Maximize">
             <Square className="w-2.5 h-2.5" />
           </button>
-          <button className="p-1 hover:text-rose-400 hover:bg-rose-950/40 rounded">
+          <button className="p-1 hover:text-rose-400 hover:bg-[#18181b] rounded" aria-label="Close">
             <X className="w-3 h-3" />
           </button>
         </div>
