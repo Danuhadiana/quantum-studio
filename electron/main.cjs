@@ -2,6 +2,14 @@ const { app, BrowserWindow, ipcMain, dialog, shell } = require('electron');
 const path = require('path');
 const os = require('os');
 
+process.on('uncaughtException', (err) => {
+  dialog.showErrorBox('Quantum Studio Error', err.stack || err.message);
+});
+
+process.on('unhandledRejection', (reason) => {
+  dialog.showErrorBox('Quantum Studio Unhandled Rejection', String(reason));
+});
+
 let mainWindow = null;
 
 function createWindow() {
