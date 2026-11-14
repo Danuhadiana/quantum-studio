@@ -1,208 +1,220 @@
-# Quantum Studio (Desktop App) 🚀
-> **The All-in-One Open-Source Desktop Studio for Code, Motion Video, and Multi-AI BYOA Engine.**
+# Quantum Studio Desktop
+
+> Perangkat lunak desktop terintegrasi untuk koding animasi terprogram, timeline video multi-track, dan gerbang multi-AI dengan model Bring-Your-Own-Agent (BYOA).
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)](https://github.com/Danuhadiana/quantum-studio)
 [![Architecture](https://img.shields.io/badge/Architecture-Tauri%202.0%20%2F%20React%20%2F%20Vite-orange)](https://vitejs.dev/)
 [![Status](https://img.shields.io/badge/Status-Beta%20v1.0.0-green)](https://github.com/Danuhadiana/quantum-studio/releases)
-[![Build Size](https://img.shields.io/badge/Installer%20Size-~18.4%20MB-success)](https://github.com/Danuhadiana/quantum-studio/releases)
 
 ---
 
-## 📸 Tampilan Antarmuka Quantum Studio
+## Tentang Quantum Studio
 
-![Quantum Studio Workstation Screenshot](docs/images/quantum-studio-workstation.png)
+Quantum Studio adalah aplikasi desktop open-source yang menggabungkan tiga alur kerja utama ke dalam satu lingkungan kerja terpadu:
+1. **Editor Kode:** Menulis skrip animasi video terprogram menggunakan React dan Remotion.
+2. **Timeline Video Multi-Track:** Pemotongan klip instan (lossless cut) berbasis binary FFmpeg, sinkronisasi audio, dan layer subtitle otomatis.
+3. **Hub Multi-AI (BYOA):** Menghubungkan kunci API kecerdasan buatan milik pengguna (Google Gemini, OpenAI, Anthropic Claude) atau model lokal (Ollama) tanpa biaya sewa platform bulanan.
 
----
-
-## 💡 Apa itu Quantum Studio?
-
-**Quantum Studio** adalah perangkat lunak desktop mandiri yang dirancang untuk memecahkan fragmentasi kerja harian developer, content creator, dan desainer. 
-
-Banyak orang harus membuka **VS Code** untuk koding, berpindah ke **CapCut/Premiere** yang berat hanya untuk memotong video atau membuat subtitle, lalu membuka browser bolak-balik untuk copy-paste prompt ke **ChatGPT/Claude**.
-
-Quantum Studio menyatukan seluruh alur kerja tersebut ke dalam **satu jendela desktop yang sangat ringan (~18.4 MB)**:
-1. **Editor Kode Monaco (seperti VS Code)** untuk membuat skrip animasi dan fungsi terprogram.
-2. **Timeline Video Multi-Track & Canvas Player 4K** untuk memotong video secara instan tanpa proses render ulang.
-3. **Hub Multi-AI dengan sistem BYOA (Bring-Your-Own-Agent)** yang menghemat biaya token API hingga **92%** menggunakan teknologi *Local Semantic Caching*.
+Aplikasi inti bersifat open-source dan gratis untuk pemakaian lokal. Pengguna dapat meningkatkan ke lisensi Pro langsung dari dalam software untuk membuka akselerasi Cloud GPU Render dan agen pra-konfigurasi.
 
 ---
 
-## ⚡ 4 Pilar Fitur Unggulan
+## Antarmuka Software
 
-### 1. Monaco Code & Programmatic Motion Engine
-* Menulis skrip animasi dan video terprogram secara deklaratif menggunakan React & Remotion.
-* Dilengkapi syntax highlighting bawaan, linting, dan autocomplete resmi engine VS Code.
-* **AI-Driven Motion Generator:** Cukup ketik instruksi ke sidebar AI, dan baris kode animasi akan terbarui secara instan pada viewport 60 FPS.
+### 1. Tampilan Ruang Kerja Utama (Workstation)
+Ruang kerja 4-panel yang menyatukan Viewport Canvas 4K 60 FPS, Monaco Code Editor, Timeline Multi-Track, dan Sidebar AI Agent Hub.
 
-```javascript
-// Contoh skrip animasi terprogram di Quantum Studio
-export const QuantumBrandStory = ({ title = "Quantum Studio Desktop" }) => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 30], [0, 1]);
-  const scale = spring({ frame, fps: 60, config: { damping: 12 } });
+![Quantum Studio Workstation](docs/images/quantum-studio-workstation.png)
 
-  return <Viewport style={{ opacity, transform: `scale(${scale})` }} />;
-};
-```
+### 2. Timeline Video Multi-Track dan Subtitle Whisper
+Navigasi visual layer video, trek audio gelombang suara, dan teks subtitle otomatis bahasa Indonesia.
 
----
+![Timeline Video dan Subtitle](docs/images/quantum-studio-timeline.png)
 
-### 2. Multi-Track Video Timeline (Lossless Cut via Native FFmpeg)
+### 3. Konfigurasi Kunci API Mandiri (BYOA)
+Panel pengaturan kunci API tersimpan lokal dan terenkripsi di komputer pengguna, mendukung engine offline Ollama tanpa koneksi internet.
 
-![Quantum Studio Multi-Track Timeline](docs/images/quantum-studio-timeline.png)
+![Konfigurasi BYOA dan Kunci API](docs/images/quantum-studio-byoa-settings.png)
 
-* **Multi-Track Layering:** Memisahkan Track Video, Auto-Subtitle AI, Audio BGM, dan Effect Overlay.
-* **Lossless Cut & Trim:** Potong klip video dalam waktu **0,1 detik** tanpa encoding ulang menggunakan akselerasi GPU hardware (NVENC/Apple Metal).
-* **Auto-Subtitle Whisper Bahasa Indonesia:** Transkripsi otomatis audio menjadi teks subtitle berformat `.srt` dengan akurasi 99.4% langsung disinkronkan ke frame video.
-* **Quick Formats:** Beralih instan antara rasio horizontal **16:9 Landscape** (YouTube/Web) dan rasio vertikal **9:16** (TikTok, Instagram Reels, YouTube Shorts).
+### 4. Toko Lisensi dan Pembelian di Dalam Aplikasi (In-App Store)
+Pembaruan lisensi Pro langsung di dalam menu software menggunakan gerbang pembayaran Midtrans (QRIS, GoPay, Virtual Account) atau input kode serial.
+
+![Toko Lisensi In-App](docs/images/quantum-studio-in-app-store.png)
 
 ---
 
-### 3. Multi-AI Hub (BYOA: Bring-Your-Own-Agent)
-* **Bawa Kunci API Sendiri:** Tidak ada biaya sewa AI bulanan yang mahal. Cukup masukkan API Key akun Anda sendiri:
-  * Google Gemini 2.0 Flash (Super cepat & murah)
-  * OpenAI GPT-4o & Whisper
-  * Anthropic Claude 3.5 Sonnet
-  * Groq LPU Ultra-Fast Inference
-* **100% Offline Mode (Ollama):** Sambungkan ke model lokal di komputer Anda (`http://localhost:11434`) seperti DeepSeek-R1 atau Llama 3 untuk bekerja tanpa koneksi internet.
-* **Privasi Penuh:** Kunci API dan data proyek tersimpan 100% secara lokal di laptop Anda tanpa diunggah ke server pihak ketiga.
+## Fitur Utama
+
+### 1. Monaco Code dan Script Engine
+* Editor kode berbasis engine resmi VS Code dengan penyorotan sintaks (syntax highlighting).
+* Penulisan skrip video terprogram menggunakan pustaka Remotion: render puluhan variasi video secara otomatis.
+* Eksekusi langsung ke canvas pratinjau real-time 60 FPS dengan rasio 16:9 (Horizontal) atau 9:16 (Vertikal Shorts/TikTok).
+
+### 2. Timeline Video Multi-Track Lossless
+* Pemotongan klip milidetik (lossless cut) tanpa render ulang encoding via FFmpeg native.
+* Generator subtitle otomatis menggunakan model OpenAI Whisper (Bahasa Indonesia dan multibahasa).
+* Manajemen aset drag-and-drop: klip video, audio BGM, dan grafis overlay.
+
+### 3. Gerbang Multi-AI (BYOA: Bring-Your-Own-Agent)
+* **Fleksibilitas Kunci API:** Pasang kunci API Google Gemini 2.0 Flash, OpenAI GPT-4o, Anthropic Claude 3.5 Sonnet, atau Groq API.
+* **Model Offline Lokal:** Integrasi endpoint Ollama (`http://localhost:11434`) untuk menjalankan DeepSeek-R1 atau Llama 3 secara gratis dan privat.
+* **Privasi Penuh:** Kunci API tersimpan di local storage pengguna; tidak ada data telemetri yang dikirim ke server pusat.
+
+### 4. Caching Semantik (Efisiensi Biaya Token 10x sampai 100x)
+* Deduplikasi konteks lokal: prompt dan aset serupa disimpan di cache lokal sehingga tidak membuang token API berulang kali.
+* Memotong biaya token API hingga 92% dibanding penggunaan web chat konvensional.
 
 ---
 
-### 4. Semantic Caching (Hemat Biaya Token Hingga 10x - 100x)
-* Masalah terbesar AI generatif adalah boros token saat melakukan pengeditan berulang.
-* Quantum Studio menyematkan mesin **Local Context Deduplication & Semantic Cache**. Jika Anda meminta perubahan kecil pada video atau skrip, sistem hanya mengirimkan bagian selisihnya (*delta*), memangkas konsumsi token hingga **92%**.
-* Monitor penghematan token ditampilkan secara transparan di panel kanan atas.
+## Perbandingan Biaya: Langganan Terpisah vs Quantum Studio BYOA
+
+| Komponen | Langganan Terpisah (Konvensional) | Quantum Studio (BYOA + Local Cache) |
+|---|---|---|
+| Asisten Koding (GitHub Copilot / Cursor) | ~$20 / bulan (~Rp 320.000) | Rp 0 (Pakai Gemini API / Ollama Lokal) |
+| Asisten Naskah (ChatGPT Plus / Claude Pro) | ~$20 / bulan (~Rp 320.000) | Sesuai pemakaian API (~Rp 15.000 / bulan) |
+| Generator Gambar & Storyboard | ~$30 / bulan (~Rp 480.000) | Pakai Stability / Flux API pay-per-image |
+| Generator Subtitle & Dubbing | ~$22 / bulan (~Rp 350.000) | Whisper Offline (Gratis) / ElevenLabs API |
+| **Total Estimasi Pengeluaran** | **~$92 - $120 / bulan (~Rp 1.470.000 - Rp 1.950.000)** | **~Rp 50.000 - Rp 150.000 / bulan (Hemat 90%+)** |
 
 ---
 
-## 🔄 Alur Kerja Pemakaian Sehari-hari (Daily Workflow)
+## Panduan Instalasi
 
-Berikut adalah contoh alur kerja pembuatan konten video atau aset presentasi dalam 3 menit:
+### Opsi A: Menggunakan Installer Desktop Siap Pakai
 
-```mermaid
-flowchart LR
-    A["1. Ketik Ide Naskah di AI Agent Hub"] --> B["2. AI Generate Skrip Kode Animasi"]
-    B --> C["3. Review Real-Time di Viewport 4K (60 FPS)"]
-    C --> D["4. Sinkronkan Subtitle Whisper Otomatis"]
-    D --> E["5. Ekspor Lossless 4K / MP4 Vertikal"]
-```
+1. Buka halaman rilis resmi di [Releases](https://github.com/Danuhadiana/quantum-studio/releases).
+2. Unduh file sesuai sistem operasi Anda:
+   * **Windows:** `QuantumStudio-Setup-v1.0.0.exe` (x64 Native, ~18.4 MB).
+   * **macOS:** `QuantumStudio-v1.0.0.dmg` (Universal binary: Apple Silicon M1/M2/M3 dan Intel).
+   * **Linux:** `QuantumStudio-v1.0.0.AppImage`.
+3. Jalankan file instalasi dan ikuti instruksi di layar komputer Anda.
 
-1. **Langkah 1: Perintahkan Agen AI**  
-   Buka panel kanan, pilih agen *Motion Director* atau *Code Architect*, lalu ketik:  
-   `"Buatkan intro teks 5 detik dengan animasi zoom in dan latar warna gelap."`
-2. **Langkah 2: Kode & Canvas Terbarui Otomatis**  
-   Skrip `BrandIntroAnimation.jsx` langsung tertulis di editor bawah dan hasilnya bergerak di player canvas atas.
-3. **Langkah 3: Sinkronkan Suara & Subtitle**  
-   Tarik file rekaman suara Anda (`.mp3` atau `.wav`) ke Track Audio. Agen Whisper otomatis menghasilkan teks subtitle kuning yang pas dengan ketukan vokal.
-4. **Langkah 4: Ekspor Cepat**  
-   Klik tombol **⚡ Export 4K 60FPS Video** di sudut player. Video langsung tersimpan di folder laptop Anda.
+### Opsi B: Menjalankan dari Kode Sumber (Developer Mode)
 
----
+#### Prasyarat Sistem
+* [Node.js](https://nodejs.org/) versi 18 atau 20 ke atas.
+* [Git](https://git-scm.com/).
+* RAM minimal 4 GB (disarankan 8 GB).
 
-## 💳 Model Lisensi & Pembelian In-App
-
-Quantum Studio menerapkan filosofi **Open-Core**:
-
-![Quantum Studio In-App Purchase Store](docs/images/quantum-studio-in-app-store.png)
-
-1. **Versi Core Open-Source (100% Gratis):**  
-   Semua fitur koding Monaco, timeline video multi-track, FFmpeg lossless cut, dan koneksi BYOA API key pribadi/Ollama lokal dapat digunakan secara gratis selamanya.
-2. **Versi Studio Pro (In-App Upgrade):**  
-   Pengguna yang membutuhkan akselerasi **Cloud GPU Render Booster**, agen prebuilt sinematik, dan sinkronisasi tim dapat melakukan upgrade langsung dari dalam aplikasi:
-   * **Langganan 1 Bulan:** Rp 149.000 / bulan
-   * **Lifetime Pass (Paling Populer):** Rp 799.000 (Bayar 1x aktif selamanya)
-   * Pembayaran didukung langsung via gerbang resmi **Midtrans Gateway** (QRIS Instan, GoPay, BCA Virtual Account, Mandiri VA) atau verifikasi **Serial License Key** (`QTM-PRO-XXXX-XXXX`).
-
----
-
-## 🛠️ Panduan Instalasi & Menjalankan
-
-### Opsi 1: Download Installer Siap Pakai (Rekomendasi Pengguna)
-Kunjungi halaman rilis resmi atau portal web Quantum:
-* 👉 **Windows:** Unduh file `QuantumStudio-Setup-v1.0.0.exe` (~18.4 MB), lalu klik dua kali untuk memasang.
-* 👉 **macOS:** Unduh file `QuantumStudio-v1.0.0.dmg` (~22.1 MB), lalu seret ke folder Applications Anda.
-
----
-
-### Opsi 2: Kloning & Jalankan dari Source Code (Developer)
-
-#### Prasyarat
-* [Node.js](https://nodejs.org/) v18.0.0 atau lebih baru
-* [Git](https://git-scm.com/)
-
+#### Langkah Instalasi
 ```bash
-# 1. Kloning repositori resmi
+# 1. Kloning repositori
 git clone https://github.com/Danuhadiana/quantum-studio.git
 
 # 2. Masuk ke direktori proyek
 cd quantum-studio
 
-# 3. Pasang seluruh dependensi
+# 3. Pasang seluruh dependensi pustaka
 npm install
 
-# 4. Jalankan aplikasi dalam mode development
+# 4. Jalankan aplikasi dalam mode pengembangan lokal
 npm run dev
 ```
-Aplikasi studio akan berjalan di browser atau desktop window pada alamat `http://localhost:3000/`.
+Buka browser pada alamat `http://localhost:3000/`.
 
 ---
 
-### Opsi 3: Kompilasi Menjadi Installer Desktop Sendiri
+## Alur Kerja Penggunaan (Workflows)
 
-Untuk mengompilasi kode sumber menjadi file binary desktop mandiri:
+### Alur 1: Koding Video Animasi Pertama
+1. Buka Quantum Studio dan pilih tab **BrandIntroAnimation.jsx** pada panel editor bawah.
+2. Edit teks judul dan durasi frame menggunakan pustaka Remotion:
+   ```jsx
+   export const BrandIntro = ({ title = "Bisnis Anda" }) => {
+     const frame = useCurrentFrame();
+     const opacity = interpolate(frame, [0, 20], [0, 1]);
+     return (
+       <div style={{ opacity }} className="text-4xl font-bold text-amber-400">
+         {title}
+       </div>
+     );
+   };
+   ```
+3. Tekan tombol **Play** pada Canvas Viewport untuk melihat hasil animasi 60 FPS secara real-time.
 
-```bash
-# Kompilasi frontend produksi
-npm run build
+### Alur 2: Menghubungkan Kunci API Mandiri (BYOA)
+1. Klik ikon **Settings** (roda gigi) pada sudut kanan atas titlebar.
+2. Masukkan kunci API Google Gemini atau OpenAI Anda.
+3. Jika menggunakan model offline, pastikan aplikasi Ollama aktif di latar belakang (`ollama run deepseek-r1`) dan biarkan URL host pada nilai default `http://localhost:11434`.
+4. Klik **Simpan Konfigurasi Kunci API**.
 
-# Preview build lokal
-npm run preview
+### Alur 3: Menghasilkan Subtitle Otomatis
+1. Masuk ke tab **Multi-Track Timeline**.
+2. Klik tombol **Whisper Subtitle** pada sidebar kanan.
+3. AI akan mengekstrak naskah audio dan menyelaraskannya dengan milidetik video pada Track 2 (Subtitle).
+
+### Alur 4: Pembelian dan Aktivasi Lisensi Pro In-App
+1. Klik tombol **Upgrade to Pro** pada titlebar software.
+2. Pilih paket yang diinginkan:
+   * **Langganan 1 Bulan:** Rp 149.000 (Akselerasi Cloud GPU Render dan pembaruan berkala).
+   * **Lifetime Pass:** Rp 799.000 (Sekali bayar, aktif selamanya).
+3. Pilih metode pembayaran Midtrans (QRIS, GoPay, atau Virtual Account BCA) dan selesaikan transaksi.
+4. Fitur Pro akan terbuka secara otomatis, atau masukkan serial key pada tab **Input Serial Key** (`QTM-PRO-XXXX-XXXX`).
+
+---
+
+## Pintasan Papan Ketik (Keyboard Shortcuts)
+
+| Pintasan | Fungsi |
+|---|---|
+| `Space` | Play atau Pause pratinjau video canvas |
+| `Ctrl + S` / `Cmd + S` | Simpan skrip animasi aktif |
+| `Ctrl + K` / `Cmd + K` | Buka jendela konfigurasi BYOA Kunci API |
+| `Ctrl + E` / `Cmd + E` | Buka dialog ekspor video |
+| `Ctrl + B` / `Cmd + B` | Beralih antara tab Code Editor dan Video Timeline |
+| `Ctrl + U` / `Cmd + U` | Buka toko lisensi in-app Quantum Studio Pro |
+| `Esc` | Menutup dialog atau modal aktif |
+
+---
+
+## Struktur Direktori
+
+```text
+quantum-studio/
+├── docs/
+│   ├── images/                        # Aset tangkapan layar antarmuka aplikasi
+│   │   ├── quantum-studio-workstation.png
+│   │   ├── quantum-studio-timeline.png
+│   │   ├── quantum-studio-byoa-settings.png
+│   │   └── quantum-studio-in-app-store.png
+│   ├── ARCHITECTURE.md                # Dokumentasi rancangan arsitektur teknis
+│   ├── BYOA_GUIDE.md                  # Panduan lengkap integrasi API dan Ollama
+│   └── GETTING_STARTED.md             # Panduan langkah demi langkah untuk pemula
+├── src/
+│   ├── components/
+│   │   ├── ByoaSettingsModal.jsx      # Modal konfigurasi kunci API mandiri
+│   │   ├── DesktopHeader.jsx          # Bar judul desktop dengan kontrol jendela
+│   │   ├── LicenseModal.jsx           # Toko lisensi in-app dan aktivasi Midtrans
+│   │   └── WorkstationView.jsx        # Ruang kerja 4-panel: Code, Video, Timeline, AI
+│   ├── App.jsx                        # Komponen induk aplikasi
+│   ├── index.css                      # Konfigurasi Tailwind CSS dan scrollbar kustom
+│   └── main.jsx                       # Titik masuk React DOM
+├── index.html                         # Template HTML desktop shell
+├── package.json                       # Konfigurasi proyek dan dependensi
+├── tailwind.config.js                 # Palet warna dan styling studio
+└── vite.config.js                     # Konfigurasi server Vite
 ```
 
 ---
 
-## ⌨️ Daftar Shortcut Keyboard Cepat
+## Dokumentasi Lanjutan
 
-| Pintasan Keyboard | Aksi |
-|---|---|
-| `Space` | Play / Pause video canvas preview |
-| `Ctrl + B` / `Cmd + B` | Split / potong klip video di posisi playhead |
-| `Ctrl + S` / `Cmd + S` | Simpan skrip kode animasi |
-| `Ctrl + E` / `Cmd + E` | Buka jendela Export 4K Video |
-| `Alt + 1` | Beralih ke Mode Code & Scripting |
-| `Alt + 2` | Beralih ke Mode Multi-Track Timeline |
-| `Ctrl + K` / `Cmd + K` | Buka modal pengaturan BYOA API Key |
-| `Ctrl + L` / `Cmd + L` | Buka modal aktivasi lisensi In-App Store |
+Untuk panduan teknis yang lebih terperinci, silakan baca dokumentasi berikut:
+* [Panduan Memulai Cepat (Getting Started)](docs/GETTING_STARTED.md): Petunjuk langkah demi langkah pembuatan proyek baru.
+* [Panduan BYOA dan Model Lokal](docs/BYOA_GUIDE.md): Konfigurasi Ollama dan integrasi kunci API.
+* [Dokumentasi Arsitektur](docs/ARCHITECTURE.md): Rancangan teknis engine desktop dan sistem caching.
 
 ---
 
-## 💻 Spesifikasi Sistem Minimum
+## Kontribusi
 
-| Komponen | Spesifikasi Minimum | Rekomendasi |
-|---|---|---|
-| **Sistem Operasi** | Windows 10/11 (64-Bit), macOS 11+, Ubuntu 20.04+ | Windows 11 / macOS Apple Silicon (M1/M2/M3) |
-| **Prosesor (CPU)** | Intel Core i3 / AMD Ryzen 3 | Intel Core i5 / AMD Ryzen 5 / Apple Silicon |
-| **Memori (RAM)** | 4 GB RAM | 8 GB - 16 GB RAM |
-| **Kartu Grafis (GPU)** | Integrated Graphics (Intel UHD) | Dedicated GPU (NVIDIA GTX/RTX atau Apple Metal) |
-| **Ruang Penyimpanan** | 200 MB ruang kosong | SSD High-Speed NVMe |
+Kontribusi dari komunitas sangat diterima. Silakan buat fork pada repositori ini, buat branch fitur baru (`git checkout -b feature/fitur-baru`), dan kirimkan Pull Request untuk ditinjau.
 
 ---
 
-## 🤝 Kontribusi Komunitas
+## Lisensi
 
-Kami sangat menyambut kontribusi dari komunitas open-source!
-1. Fork repositori ini.
-2. Buat branch fitur baru Anda: `git checkout -b feature/FiturKeren`.
-3. Lakukan commit perubahan: `git commit -m 'feat: menambahkan transisi baru'`.
-4. Push ke branch Anda: `git push origin feature/FiturKeren`.
-5. Buka sebuah **Pull Request** di GitHub.
+Proyek ini dilisensikan di bawah lisensi **MIT**. Rincian lengkap dapat dibaca pada berkas [LICENSE](LICENSE).
 
----
-
-## 📄 Lisensi
-
-Proyek ini dilisensikan secara resmi di bawah lisensi **MIT License**. Kode sumber bebas digunakan, dimodifikasi, dan didistribusikan kembali untuk keperluan pribadi maupun komersial.
-
-Dikembangkan dengan dedikasi oleh **[Danu Hadiana](https://github.com/Danuhadiana)** / **[Quantum Studio](https://quantum-cloud.pages.dev)**.
+Dikelola dan dikembangkan oleh [Danu Hadiana](https://github.com/Danuhadiana) untuk ekosistem Quantum Studio.
