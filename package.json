@@ -3,13 +3,18 @@
   "private": true,
   "version": "1.0.0-beta",
   "type": "module",
+  "main": "electron/main.cjs",
   "description": "All-in-One Open-Source Desktop Studio for Code, Motion Video & Multi-AI BYOA Engine",
-  "author": "Quantum Studio <danuhadiana.dev@gmail.com>",
+  "author": "Danu Hadiana <danuhadiana.dev@gmail.com>",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron:dev": "electron .",
+    "dist": "npm run build && electron-builder --win",
+    "dist:dir": "npm run build && electron-builder --win --dir",
+    "dist:portable": "npm run build && electron-builder --win portable"
   },
   "dependencies": {
     "lucide-react": "^0.344.0",
@@ -19,8 +24,42 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
+    "electron": "^45.3.2",
+    "electron-builder": "^26.18.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "vite": "^6.0.0"
+  },
+  "build": {
+    "appId": "com.danuhadiana.quantumstudio",
+    "productName": "Quantum Studio",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Quantum Studio"
+    }
   }
 }
