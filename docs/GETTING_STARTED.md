@@ -19,9 +19,11 @@ Sebelum menginstal Quantum Studio, pastikan komputer Anda memenuhi spesifikasi m
 ## Langkah 1: Memasang Aplikasi
 
 ### Menggunakan Installer Desktop
-1. Unduh installer resmi Windows: [Quantum-Studio-Setup-1.0.0-beta.exe](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup-1.0.0-beta.exe) atau melalui [GitHub Releases](https://github.com/Danuhadiana/quantum-studio/releases/tag/v1.0.0-beta).
-2. Di Windows, klik ganda berkas `Quantum-Studio-Setup-1.0.0-beta.exe` dan ikuti wizard pemasangan.
-3. Setelah instalasi selesai, buka aplikasi Quantum Studio langsung dari menu Start atau shortcut Desktop.
+1. Unduh installer ringan resmi Windows: [Quantum-Studio-Setup.exe (58 KB)](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup.exe) atau melalui [GitHub Releases](https://github.com/Danuhadiana/quantum-studio/releases/tag/v1.0.0-beta).
+2. Di Windows, klik ganda berkas `Quantum-Studio-Setup.exe`.
+   * Jika muncul pesan Windows Defender SmartScreen (*"Windows protected your PC"*), klik teks **More info** lalu klik tombol **Run anyway**. Hal ini wajar untuk aplikasi open-source independen yang baru dirilis.
+3. Klik tombol **Pasang Sekarang** pada jendela installer. Paket inti aplikasi akan otomatis diunduh dan dipasang di folder lokal tanpa memerlukan Node.js.
+4. Setelah instalasi selesai, buka aplikasi Quantum Studio langsung dari menu Start atau shortcut Desktop.
 
 ### Menjalankan dari Kode Sumber (Pengembang)
 ```bash

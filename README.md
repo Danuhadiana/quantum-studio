@@ -84,10 +84,13 @@ Pembaruan lisensi Pro langsung di dalam menu software menggunakan gerbang pembay
 ### Opsi A: Menggunakan Installer Desktop Siap Pakai
 
 1. Unduh installer resmi untuk Windows:
-   * **Windows 64-bit Installer (.exe):** [Quantum-Studio-Setup-1.0.0-beta.exe (118 MB)](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup-1.0.0-beta.exe)
+   * **Windows Web Setup (.exe, Sangat Ringan):** [Quantum-Studio-Setup.exe (58 KB)](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup.exe) (Rekomendasi: download instan dalam 1 detik, mengunduh dan memasang paket lengkap otomatis di latar belakang).
+   * **Paket Mandiri Lengkap (Offline Setup):** [Quantum-Studio-Setup-1.0.0-beta.exe (118 MB)](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup-1.0.0-beta.exe)
    * **Halaman Semua Rilis:** [GitHub Releases](https://github.com/Danuhadiana/quantum-studio/releases/tag/v1.0.0-beta)
-2. Klik ganda berkas `Quantum-Studio-Setup-1.0.0-beta.exe` untuk menjalankan wizard instalasi di komputer Anda.
-3. Setelah instalasi selesai, buka **Quantum Studio** melalui menu Start atau shortcut Desktop.
+2. Klik ganda berkas `Quantum-Studio-Setup.exe` untuk menjalankan wizard instalasi di komputer Anda.
+3. **Catatan Windows Defender SmartScreen:**
+   Sebagai aplikasi open-source independen yang baru dirilis tanpa sertifikat komersial berbayar (EV Code Signing), Windows SmartScreen mungkin menampilkan dialog *"Windows protected your PC"*. Cukup klik tautan **More info** lalu pilih tombol **Run anyway** untuk mengizinkan aplikasi berjalan. Peringatan ini hanya muncul satu kali saat pertama kali dibuka.
+4. Setelah instalasi selesai, buka **Quantum Studio** melalui menu Start atau shortcut Desktop.
 
 ### Opsi B: Menjalankan dari Kode Sumber (Developer Mode)
 
