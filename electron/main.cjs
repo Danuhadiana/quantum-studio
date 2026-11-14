@@ -109,4 +109,17 @@ function setupIpcHandlers() {
     }
     return false;
   });
+
+  ipcMain.handle('app:relaunch', () => {
+    app.relaunch();
+    app.exit(0);
+  });
+
+  ipcMain.handle('app:reloadWindow', () => {
+    if (mainWindow) {
+      mainWindow.reload();
+      return true;
+    }
+    return false;
+  });
 }

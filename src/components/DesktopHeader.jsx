@@ -1,9 +1,10 @@
 import React from 'react';
 import { 
   Key, Minus, Square, X, ShieldCheck, 
-  Settings, HelpCircle, HardDrive
+  Settings, HelpCircle, HardDrive, RefreshCw
 } from 'lucide-react';
 import ClockLogo from './ClockLogo';
+import UpdateNotificationPill from './UpdateNotificationPill';
 
 export default function DesktopHeader({ 
   isPro, 
@@ -11,6 +12,10 @@ export default function DesktopHeader({
   onOpenLicenseModal, 
   onOpenSettingsModal 
 }) {
+  const triggerCheckUpdate = () => {
+    window.dispatchEvent(new CustomEvent('qtm:trigger-test-update'));
+  };
+
   return (
     <header className="h-10 bg-[#09090b] border-b border-[#222226] flex items-center justify-between px-3 select-none text-xs text-neutral-300">
       
@@ -29,9 +34,13 @@ export default function DesktopHeader({
           <span className="font-extrabold text-[13px] tracking-tight text-white">
             Quantum<span className="text-[#facc15] font-light">Studio</span>
           </span>
-          <span className="text-[10px] font-mono text-neutral-400 bg-[#121216] px-1.5 py-0.5 rounded border border-[#27272a]">
+          <button
+            onClick={triggerCheckUpdate}
+            title="Klik untuk memeriksa pembaruan versi"
+            className="text-[10px] font-mono text-neutral-400 hover:text-white bg-[#121216] hover:bg-[#1c1c21] px-1.5 py-0.5 rounded border border-[#27272a] transition-colors cursor-pointer"
+          >
             v1.0.0
-          </span>
+          </button>
         </div>
 
         {/* Studio Quick Menus (After Effects / CapCut Desktop Style) */}
@@ -41,15 +50,25 @@ export default function DesktopHeader({
           <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Composition</span>
           <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Timeline</span>
           <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">View</span>
-          <span className="hover:text-white cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]">Help</span>
+          <span 
+            onClick={triggerCheckUpdate}
+            className="hover:text-[#facc15] cursor-pointer transition-colors px-1 py-0.5 rounded hover:bg-[#18181b]" 
+            title="Periksa update versi software"
+          >
+            Cek Update
+          </span>
         </div>
       </div>
 
-      {/* Center: Current Project Info */}
-      <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono text-neutral-400 bg-[#121216] px-3 py-1 rounded-md border border-[#222226]">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-        <span className="text-neutral-200">BrandIntro_4K_60FPS.qtm</span>
-        <span className="text-neutral-500">(Tersimpan Lokal)</span>
+      {/* Center: Current Project Info & Live Flash Update Pill */}
+      <div className="flex items-center gap-2">
+        <UpdateNotificationPill currentVersion="1.0.0" />
+        
+        <div className="hidden lg:flex items-center gap-2 text-[11px] font-mono text-neutral-400 bg-[#121216] px-3 py-1 rounded-md border border-[#222226]">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span className="text-neutral-200">BrandIntro_4K_60FPS.qtm</span>
+          <span className="text-neutral-500">(Tersimpan Lokal)</span>
+        </div>
       </div>
 
       {/* Right: License Status & Actions */}

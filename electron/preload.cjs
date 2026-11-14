@@ -7,4 +7,6 @@ contextBridge.exposeInMainWorld('quantumNative', {
   openMediaDialog: () => ipcRenderer.invoke('dialog:openMedia'),
   saveExportDialog: (defaultName) => ipcRenderer.invoke('dialog:saveExport', defaultName),
   openExternalUrl: (url) => ipcRenderer.invoke('shell:openExternal', url),
+  relaunchApp: () => ipcRenderer.invoke('app:relaunch'),
+  reloadWindow: () => ipcRenderer.invoke('app:reloadWindow'),
 });
