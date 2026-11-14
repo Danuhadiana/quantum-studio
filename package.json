@@ -1,0 +1,26 @@
+{
+  "name": "quantum-studio-desktop",
+  "private": true,
+  "version": "1.0.0-beta",
+  "type": "module",
+  "description": "All-in-One Open-Source Desktop Studio for Code, Motion Video & Multi-AI BYOA Engine",
+  "author": "Quantum Studio <danuhadiana.dev@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lucide-react": "^0.344.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.0"
+  }
+}
