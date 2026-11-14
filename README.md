@@ -83,12 +83,11 @@ Pembaruan lisensi Pro langsung di dalam menu software menggunakan gerbang pembay
 
 ### Opsi A: Menggunakan Installer Desktop Siap Pakai
 
-1. Buka halaman rilis resmi di [Releases](https://github.com/Danuhadiana/quantum-studio/releases).
-2. Unduh file sesuai sistem operasi Anda:
-   * **Windows:** `QuantumStudio-Setup-v1.0.0.exe` (x64 Native, ~18.4 MB).
-   * **macOS:** `QuantumStudio-v1.0.0.dmg` (Universal binary: Apple Silicon M1/M2/M3 dan Intel).
-   * **Linux:** `QuantumStudio-v1.0.0.AppImage`.
-3. Jalankan file instalasi dan ikuti instruksi di layar komputer Anda.
+1. Unduh installer resmi untuk Windows:
+   * **Windows 64-bit Installer (.exe):** [Quantum-Studio-Setup-1.0.0-beta.exe (118 MB)](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup-1.0.0-beta.exe)
+   * **Halaman Semua Rilis:** [GitHub Releases](https://github.com/Danuhadiana/quantum-studio/releases/tag/v1.0.0-beta)
+2. Klik ganda berkas `Quantum-Studio-Setup-1.0.0-beta.exe` untuk menjalankan wizard instalasi di komputer Anda.
+3. Setelah instalasi selesai, buka **Quantum Studio** melalui menu Start atau shortcut Desktop.
 
 ### Opsi B: Menjalankan dari Kode Sumber (Developer Mode)
 

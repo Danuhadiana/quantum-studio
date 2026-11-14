@@ -19,10 +19,9 @@ Sebelum menginstal Quantum Studio, pastikan komputer Anda memenuhi spesifikasi m
 ## Langkah 1: Memasang Aplikasi
 
 ### Menggunakan Installer Desktop
-1. Unduh installer resmi untuk sistem operasi Anda melalui halaman rilis GitHub.
-2. Di Windows, klik dua kali pada file `QuantumStudio-Setup-v1.0.0.exe` dan ikuti instruksi pemasangan.
-3. Di macOS, buka file `.dmg` dan seret ikon Quantum Studio ke folder Applications Anda.
-4. Buka aplikasi Quantum Studio.
+1. Unduh installer resmi Windows: [Quantum-Studio-Setup-1.0.0-beta.exe](https://github.com/Danuhadiana/quantum-studio/releases/download/v1.0.0-beta/Quantum-Studio-Setup-1.0.0-beta.exe) atau melalui [GitHub Releases](https://github.com/Danuhadiana/quantum-studio/releases/tag/v1.0.0-beta).
+2. Di Windows, klik ganda berkas `Quantum-Studio-Setup-1.0.0-beta.exe` dan ikuti wizard pemasangan.
+3. Setelah instalasi selesai, buka aplikasi Quantum Studio langsung dari menu Start atau shortcut Desktop.
 
 ### Menjalankan dari Kode Sumber (Pengembang)
 ```bash
