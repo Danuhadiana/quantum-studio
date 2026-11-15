@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { 
   ShieldCheck, Key, Check, Zap, Sparkles, CreditCard, 
   ArrowRight, RefreshCw, AlertCircle, CheckCircle2, Lock, 
-  Laptop, HardDrive, Film, Award
+  Laptop, HardDrive, Film, Award, Cpu
 } from 'lucide-react';
 
 export default function LicenseView({ isPro, licenseKey, onActivateSuccess, onSwitchToPlayer }) {

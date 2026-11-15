@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { 
-  Minus, Square, X, ShieldCheck, 
+  ShieldCheck, 
   Settings, RefreshCw, Cpu, Film, Terminal,
   ChevronDown, HelpCircle, HardDrive, Download,
   Layers, Scissors, Play, Pause, ExternalLink, Code
 } from 'lucide-react';
 import ClockLogo from './ClockLogo';
+import UpdateNotificationPill from './UpdateNotificationPill';
 
 export default function DesktopHeader({ 
   isPro, 
@@ -16,12 +17,22 @@ export default function DesktopHeader({
   onSplitClip,
   onTogglePlay,
   projectTitle = "Untitled Project",
-  setProjectTitle
+  setProjectTitle,
+  onSaveProject,
+  onSaveProjectAs,
+  onNewProject,
+  onOpenProject,
+  showToast
 }) {
   const [openMenu, setOpenMenu] = useState(null); // 'file', 'edit', 'view', 'help'
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
 
   const triggerCheckUpdate = () => {
+    setIsCheckingUpdate(true);
     window.dispatchEvent(new CustomEvent('qtm:trigger-test-update'));
+    setTimeout(() => {
+      setIsCheckingUpdate(false);
+    }, 600);
   };
 
   const handleMenuClick = (menuName) => {
@@ -62,18 +73,48 @@ export default function DesktopHeader({
             {openMenu === 'file' && (
               <div 
                 onMouseLeave={handleCloseMenu}
-                className="absolute left-0 top-full mt-1 w-48 bg-[#121317] border border-[#222329] rounded-lg shadow-2xl py-1 text-[11.5px] z-50 text-zinc-200"
+                className="absolute left-0 top-full mt-1 w-52 bg-[#121317] border border-[#222329] rounded-lg shadow-2xl py-1 text-[11.5px] z-50 text-zinc-200"
               >
                 <button 
+                  onClick={() => { onNewProject && onNewProject(); handleCloseMenu(); }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
+                >
+                  <span>New Project</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Ctrl+N</span>
+                </button>
+                <button 
+                  onClick={() => { onOpenProject && onOpenProject(); handleCloseMenu(); }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
+                >
+                  <span>Open Project...</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Ctrl+O</span>
+                </button>
+                <div className="my-1 border-t border-[#1e1f26]"></div>
+                <button 
+                  onClick={() => { onSaveProject && onSaveProject(); handleCloseMenu(); }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
+                >
+                  <span>Save Project</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Ctrl+S</span>
+                </button>
+                <button 
+                  onClick={() => { onSaveProjectAs && onSaveProjectAs(); handleCloseMenu(); }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
+                >
+                  <span>Save Project As...</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Ctrl+Shift+S</span>
+                </button>
+                <div className="my-1 border-t border-[#1e1f26]"></div>
+                <button 
                   onClick={() => { onImportMedia && onImportMedia(); handleCloseMenu(); }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between"
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
                 >
                   <span>Import Media...</span>
                   <span className="text-[10px] text-zinc-500 font-mono">Ctrl+I</span>
                 </button>
                 <button 
                   onClick={() => { onSelectTab('export'); handleCloseMenu(); }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between"
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
                 >
                   <span>Export Video...</span>
                   <span className="text-[10px] text-zinc-500 font-mono">Ctrl+E</span>
@@ -81,9 +122,21 @@ export default function DesktopHeader({
                 <div className="my-1 border-t border-[#1e1f26]"></div>
                 <button 
                   onClick={() => { onSelectTab('settings'); handleCloseMenu(); }}
-                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white"
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] hover:text-white flex justify-between items-center cursor-pointer"
                 >
-                  Preferences...
+                  <span>Preferences...</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Ctrl+,</span>
+                </button>
+                <div className="my-1 border-t border-[#1e1f26]"></div>
+                <button 
+                  onClick={() => {
+                    handleCloseMenu();
+                    window.close();
+                  }}
+                  className="w-full text-left px-3 py-1.5 hover:bg-[#1b1d24] text-rose-400 hover:text-rose-300 flex justify-between items-center cursor-pointer"
+                >
+                  <span>Exit Quantum Studio</span>
+                  <span className="text-[10px] text-zinc-500 font-mono">Alt+F4</span>
                 </button>
               </div>
             )}
@@ -158,10 +211,16 @@ export default function DesktopHeader({
           {/* Single Menu Action: Cek Update */}
           <button
             onClick={triggerCheckUpdate}
-            className="px-2 py-0.5 rounded text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors"
+            disabled={isCheckingUpdate}
+            className="px-2 py-0.5 rounded text-zinc-400 hover:text-zinc-100 hover:bg-[#121316] transition-colors flex items-center gap-1.5 cursor-pointer disabled:opacity-75"
+            title="Periksa ketersediaan pembaruan software"
           >
-            Cek Update
+            {isCheckingUpdate && <RefreshCw className="w-2.5 h-2.5 animate-spin text-zinc-400" />}
+            <span>{isCheckingUpdate ? 'Memeriksa...' : 'Cek Update'}</span>
           </button>
+
+          {/* Dynamic Update Pill */}
+          <UpdateNotificationPill />
         </div>
 
         {/* Subtle Save Status */}
@@ -181,7 +240,7 @@ export default function DesktopHeader({
         />
       </div>
 
-      {/* 3. RIGHT: ESSENTIAL NAVIGATION PILLS, SETTINGS, EXPORT BUTTON & WINDOW CONTROLS */}
+      {/* 3. RIGHT: ESSENTIAL NAVIGATION PILLS, SETTINGS, EXPORT BUTTON */}
       <div className="flex items-center gap-2">
         
         {/* Clean Mode Switcher: Studio | AI Hub */}
@@ -248,19 +307,6 @@ export default function DesktopHeader({
           <Download className="w-3.5 h-3.5 stroke-[2.2]" />
           <span>Export</span>
         </button>
-
-        {/* Standard Windows Controls */}
-        <div className="flex items-center ml-2 border-l border-[#202126] pl-2 gap-1.5 text-zinc-500">
-          <div className="w-3 h-3 flex items-center justify-center hover:text-white cursor-pointer" title="Minimize">
-            <Minus className="w-3 h-3" />
-          </div>
-          <div className="w-3 h-3 flex items-center justify-center hover:text-white cursor-pointer" title="Maximize">
-            <Square className="w-2.5 h-2.5" />
-          </div>
-          <div className="w-3 h-3 flex items-center justify-center hover:text-rose-400 cursor-pointer" title="Close">
-            <X className="w-3 h-3" />
-          </div>
-        </div>
 
       </div>
 
