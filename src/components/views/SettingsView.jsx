@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Settings, Sliders, Monitor, Cpu, Keyboard, Database, 
+  Sliders, Monitor, Cpu, Keyboard, Database, 
   Check, Save, RefreshCw, ArrowRight, ShieldCheck, Moon, Laptop
 } from 'lucide-react';
 
 export default function SettingsView({ onSwitchToPlayer }) {
-  const [activeSection, setActiveSection] = useState('editor'); // 'editor', 'remotion', 'hardware', 'shortcuts'
+  const [activeSection, setActiveSection] = useState('editor'); // 'editor', 'remotion', 'hardware', 'shortcuts', 'storage'
   
   // Settings States
   const [fontSize, setFontSize] = useState('13');
@@ -13,7 +13,6 @@ export default function SettingsView({ onSwitchToPlayer }) {
   const [defaultFps, setDefaultFps] = useState('60');
   const [defaultResolution, setDefaultResolution] = useState('4k');
   const [gpuAcceleration, setGpuAcceleration] = useState(true);
-  const [themeMode, setThemeMode] = useState('after-effects-dark');
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   useEffect(() => {
@@ -37,49 +36,49 @@ export default function SettingsView({ onSwitchToPlayer }) {
   };
 
   const handleClearCache = () => {
-    if (window.confirm('Bersihkan cache rendering sementara dan riwayat sesi? (Pengaturan dan Kunci API tidak akan terhapus)')) {
+    if (window.confirm('Bersihkan cache rendering sementara dan riwayat sesi? (Kunci API dan Lisensi tidak akan terhapus)')) {
       sessionStorage.clear();
       alert('Cache rendering lokal telah dibersihkan.');
     }
   };
 
   return (
-    <div className="h-full w-full bg-[#0c0d10] text-zinc-100 flex flex-col overflow-y-auto selection:bg-amber-400/20">
+    <div className="h-full w-full bg-[#0c0d10] text-zinc-100 flex flex-col overflow-y-auto selection:bg-zinc-700">
       
-      {/* 1. TOP HEADER */}
-      <div className="p-6 border-b border-[#1c1d22] bg-[#0f1013] shrink-0">
+      {/* 1. TOP HEADER (CLEAN & PROFESSIONAL MONOCHROME) */}
+      <div className="p-5 border-b border-[#1c1d22] bg-[#0f1013] shrink-0">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1.5">
+            <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300">
-                Preferences: Settings
+                Preferences
               </span>
               <span className="text-[10px] font-mono text-zinc-500">
-                VS Code Style Configuration Page (Zero Modal)
+                Studio Configuration
               </span>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              Pengaturan Workspace &amp; Engine Quantum Studio
+            <h1 className="text-xl font-bold tracking-tight text-white">
+              Pengaturan Studio
             </h1>
-            <p className="text-xs text-zinc-400 mt-1">
-              Sesuaikan preferensi editor kode, default rendering Remotion, akselerasi perangkat keras GPU, dan pintasan keyboard.
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Sesuaikan preferensi editor skrip, resolusi master default, akselerasi GPU, dan pintasan keyboard.
             </p>
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
             <button
               onClick={handleSaveSettings}
-              className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs flex items-center gap-2 transition-all shadow-md active:scale-95 cursor-pointer"
+              className="px-4 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               {savedSuccess ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Save className="w-3.5 h-3.5" />}
-              <span>{savedSuccess ? 'Tersimpan!' : 'Simpan Pengaturan'}</span>
+              <span>{savedSuccess ? 'Tersimpan!' : 'Simpan Perubahan'}</span>
             </button>
             {onSwitchToPlayer && (
               <button
                 onClick={onSwitchToPlayer}
-                className="px-3.5 py-2 rounded-lg bg-[#18191d] hover:bg-[#222328] border border-[#27282e] text-xs text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-lg bg-[#18191d] hover:bg-[#222328] border border-[#27282e] text-xs text-zinc-300 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <span>Buka Viewport</span>
+                <span>Kembali ke Editor</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             )}
@@ -87,67 +86,67 @@ export default function SettingsView({ onSwitchToPlayer }) {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto w-full p-6 flex-1 flex flex-col md:flex-row gap-6">
+      <div className="max-w-5xl mx-auto w-full p-5 flex-1 flex flex-col md:flex-row gap-6">
         
-        {/* 2. SIDEBAR SUB-NAVIGASI PREFERENCES */}
+        {/* 2. SIDEBAR SUB-NAVIGASI PREFERENCES (MONOCHROME & MINIMALIST) */}
         <div className="w-full md:w-56 shrink-0 space-y-1 text-xs">
           <button
             onClick={() => setActiveSection('editor')}
-            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors ${
-              activeSection === 'editor' ? 'bg-[#1a1b22] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
+            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
+              activeSection === 'editor' ? 'bg-[#1b1c24] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
             }`}
           >
-            <Laptop className="w-4 h-4 text-amber-400" />
+            <Laptop className="w-4 h-4 text-zinc-400" />
             <span>Editor &amp; Tampilan</span>
           </button>
           
           <button
             onClick={() => setActiveSection('remotion')}
-            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors ${
-              activeSection === 'remotion' ? 'bg-[#1a1b22] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
+            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
+              activeSection === 'remotion' ? 'bg-[#1b1c24] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
             }`}
           >
-            <Monitor className="w-4 h-4 text-emerald-400" />
+            <Monitor className="w-4 h-4 text-zinc-400" />
             <span>Remotion Render Engine</span>
           </button>
           
           <button
             onClick={() => setActiveSection('hardware')}
-            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors ${
-              activeSection === 'hardware' ? 'bg-[#1a1b22] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
+            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
+              activeSection === 'hardware' ? 'bg-[#1b1c24] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
             }`}
           >
-            <Cpu className="w-4 h-4 text-blue-400" />
+            <Cpu className="w-4 h-4 text-zinc-400" />
             <span>GPU &amp; Perangkat Keras</span>
           </button>
 
           <button
             onClick={() => setActiveSection('shortcuts')}
-            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors ${
-              activeSection === 'shortcuts' ? 'bg-[#1a1b22] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
+            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
+              activeSection === 'shortcuts' ? 'bg-[#1b1c24] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
             }`}
           >
-            <Keyboard className="w-4 h-4 text-purple-400" />
+            <Keyboard className="w-4 h-4 text-zinc-400" />
             <span>Pintasan Keyboard</span>
           </button>
 
           <button
             onClick={() => setActiveSection('storage')}
-            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors ${
-              activeSection === 'storage' ? 'bg-[#1a1b22] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
+            className={`w-full px-3 py-2 rounded-lg text-left flex items-center gap-2.5 transition-colors cursor-pointer ${
+              activeSection === 'storage' ? 'bg-[#1b1c24] text-white font-semibold' : 'text-zinc-400 hover:text-white hover:bg-[#14151a]'
             }`}
           >
-            <Database className="w-4 h-4 text-rose-400" />
+            <Database className="w-4 h-4 text-zinc-400" />
             <span>Cache &amp; Penyimpanan</span>
           </button>
         </div>
 
         {/* 3. SECTION CONTENT */}
-        <div className="flex-1 space-y-5 text-xs">
+        <div className="flex-1 space-y-4 text-xs">
           
           {/* SECTION 1: EDITOR & TAMPILAN */}
           {activeSection === 'editor' && (
-            <div className="p-5 rounded-2xl bg-[#121317] border border-[#202126] space-y-4">
+            <div className="p-5 rounded-xl bg-[#121317] border border-[#202126] space-y-4">
               <h2 className="text-sm font-bold text-white border-b border-[#1c1d22] pb-2">
                 Editor &amp; Tampilan Visual
               </h2>
@@ -161,7 +160,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   <select
                     value={fontSize}
                     onChange={(e) => setFontSize(e.target.value)}
-                    className="bg-[#0c0d10] border border-[#222328] rounded px-3 py-1.5 text-xs text-white"
+                    className="bg-[#09090b] border border-[#222328] rounded px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="12">12 px (Kompak)</option>
                     <option value="13">13 px (Default)</option>
@@ -178,7 +177,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   <select
                     value={autosaveInterval}
                     onChange={(e) => setAutosaveInterval(e.target.value)}
-                    className="bg-[#0c0d10] border border-[#222328] rounded px-3 py-1.5 text-xs text-white"
+                    className="bg-[#09090b] border border-[#222328] rounded px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="5">Setiap 5 Detik</option>
                     <option value="10">Setiap 10 Detik (Disarankan)</option>
@@ -191,8 +190,8 @@ export default function SettingsView({ onSwitchToPlayer }) {
                     <div className="font-semibold text-white">Tema Antarmuka Studio</div>
                     <div className="text-[11px] text-zinc-500">Skema warna monokrom studio minimalis</div>
                   </div>
-                  <span className="px-2.5 py-1 rounded bg-[#0c0d10] border border-[#222328] text-zinc-300 font-mono text-[11px]">
-                    After Effects Dark Monochrome (#09090b)
+                  <span className="px-2.5 py-1 rounded bg-[#09090b] border border-[#222328] text-zinc-300 font-mono text-[11px]">
+                    Dark Monochrome Studio (#09090b)
                   </span>
                 </div>
               </div>
@@ -201,7 +200,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
 
           {/* SECTION 2: REMOTION ENGINE */}
           {activeSection === 'remotion' && (
-            <div className="p-5 rounded-2xl bg-[#121317] border border-[#202126] space-y-4">
+            <div className="p-5 rounded-xl bg-[#121317] border border-[#202126] space-y-4">
               <h2 className="text-sm font-bold text-white border-b border-[#1c1d22] pb-2">
                 Remotion Render Engine Defaults
               </h2>
@@ -215,7 +214,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   <select
                     value={defaultFps}
                     onChange={(e) => setDefaultFps(e.target.value)}
-                    className="bg-[#0c0d10] border border-[#222328] rounded px-3 py-1.5 text-xs text-white"
+                    className="bg-[#09090b] border border-[#222328] rounded px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
                     <option value="60">60 FPS (Ultra Smooth &amp; Modern)</option>
                     <option value="30">30 FPS (Standar Video Online)</option>
@@ -231,12 +230,12 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   <select
                     value={defaultResolution}
                     onChange={(e) => setDefaultResolution(e.target.value)}
-                    className="bg-[#0c0d10] border border-[#222328] rounded px-3 py-1.5 text-xs text-white"
+                    className="bg-[#09090b] border border-[#222328] rounded px-3 py-1.5 text-xs text-white focus:outline-none"
                   >
-                    <option value="4k">3840 x 2160 (4K UHD 16:9)</option>
-                    <option value="1080p">1920 x 1080 (Full HD 16:9)</option>
-                    <option value="shorts">1080 x 1920 (9:16 TikTok / Reels)</option>
-                    <option value="square">1080 x 1080 (1:1 Square Feed)</option>
+                    <option value="4k">3840 × 2160 (4K UHD 16:9)</option>
+                    <option value="1080p">1920 × 1080 (Full HD 16:9)</option>
+                    <option value="shorts">1080 × 1920 (9:16 TikTok / Reels)</option>
+                    <option value="square">1080 × 1080 (1:1 Square Feed)</option>
                   </select>
                 </div>
               </div>
@@ -245,7 +244,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
 
           {/* SECTION 3: HARDWARE & GPU */}
           {activeSection === 'hardware' && (
-            <div className="p-5 rounded-2xl bg-[#121317] border border-[#202126] space-y-4">
+            <div className="p-5 rounded-xl bg-[#121317] border border-[#202126] space-y-4">
               <h2 className="text-sm font-bold text-white border-b border-[#1c1d22] pb-2">
                 Akselerasi Perangkat Keras GPU &amp; WebCodecs
               </h2>
@@ -258,8 +257,8 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   </div>
                   <button
                     onClick={() => setGpuAcceleration(!gpuAcceleration)}
-                    className={`px-3 py-1 rounded font-mono text-[11px] font-bold transition-colors ${
-                      gpuAcceleration ? 'bg-emerald-950 border border-emerald-800 text-emerald-400' : 'bg-zinc-800 text-zinc-400'
+                    className={`px-3 py-1 rounded font-mono text-[11px] font-bold transition-colors cursor-pointer ${
+                      gpuAcceleration ? 'bg-zinc-800 border border-zinc-600 text-zinc-200' : 'bg-zinc-900 border border-zinc-800 text-zinc-500'
                     }`}
                   >
                     {gpuAcceleration ? 'ENABLED' : 'DISABLED'}
@@ -271,27 +270,39 @@ export default function SettingsView({ onSwitchToPlayer }) {
 
           {/* SECTION 4: SHORTCUTS */}
           {activeSection === 'shortcuts' && (
-            <div className="p-5 rounded-2xl bg-[#121317] border border-[#202126] space-y-4">
+            <div className="p-5 rounded-xl bg-[#121317] border border-[#202126] space-y-4">
               <h2 className="text-sm font-bold text-white border-b border-[#1c1d22] pb-2">
-                Daftar Pintasan Keyboard (After Effects &amp; VS Code)
+                Daftar Pintasan Keyboard Studio
               </h2>
 
               <div className="space-y-2 font-mono text-[11px]">
-                <div className="flex justify-between py-1.5 border-b border-[#1c1d22]">
-                  <span className="text-zinc-400">Play / Pause Timeline</span>
-                  <span className="px-2 py-0.5 rounded bg-[#0c0d10] border border-[#222328] text-amber-400">Spasi (Space)</span>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Play / Pause Timeline</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Spasi (Space)</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-[#1c1d22]">
-                  <span className="text-zinc-400">Potong Clip pada Playhead (Split / Scissors)</span>
-                  <span className="px-2 py-0.5 rounded bg-[#0c0d10] border border-[#222328] text-amber-400">Ctrl + B</span>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Potong Clip pada Playhead (Split / Scissors)</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Ctrl + B</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-[#1c1d22]">
-                  <span className="text-zinc-400">Simpan Konfigurasi &amp; Kode</span>
-                  <span className="px-2 py-0.5 rounded bg-[#0c0d10] border border-[#222328] text-amber-400">Ctrl + S</span>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Buka Jendela Ekspor Video</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Ctrl + E</span>
                 </div>
-                <div className="flex justify-between py-1.5 border-b border-[#1c1d22]">
-                  <span className="text-zinc-400">Reset Frame ke Awal (Rewind)</span>
-                  <span className="px-2 py-0.5 rounded bg-[#0c0d10] border border-[#222328] text-amber-400">Home / Shift + ←</span>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Impor Media (Foto / Video)</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Ctrl + I</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Simpan Konfigurasi &amp; Posisi Objek</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Ctrl + S</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-[#1c1d22]">
+                  <span className="text-zinc-400 font-sans">Mundur 1 Frame / Maju 1 Frame</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">← / →</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-zinc-400 font-sans">Reset Playhead ke Awal (Rewind)</span>
+                  <span className="px-2 py-0.5 rounded bg-[#09090b] border border-[#222328] text-zinc-300">Home</span>
                 </div>
               </div>
             </div>
@@ -299,7 +310,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
 
           {/* SECTION 5: STORAGE & CACHE */}
           {activeSection === 'storage' && (
-            <div className="p-5 rounded-2xl bg-[#121317] border border-[#202126] space-y-4">
+            <div className="p-5 rounded-xl bg-[#121317] border border-[#202126] space-y-4">
               <h2 className="text-sm font-bold text-white border-b border-[#1c1d22] pb-2">
                 Manajemen Cache &amp; Reset
               </h2>
@@ -312,7 +323,7 @@ export default function SettingsView({ onSwitchToPlayer }) {
                   </div>
                   <button
                     onClick={handleClearCache}
-                    className="px-3 py-1.5 rounded bg-rose-950/60 hover:bg-rose-900 border border-rose-800 text-rose-300 text-xs transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-lg bg-[#1c1417] hover:bg-[#25191d] border border-rose-900/40 text-rose-300 text-xs transition-colors cursor-pointer"
                   >
                     Bersihkan Cache
                   </button>

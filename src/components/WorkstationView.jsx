@@ -438,7 +438,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               onClick={() => setActiveTab('player')}
               title="Composition / Player (After Effects & Remotion)"
               className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'player' ? 'bg-[#181920] text-[#facc15] border border-[#facc15]/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+                activeTab === 'player' ? 'bg-[#1e2028] text-white border border-zinc-700' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
               }`}
             >
               <Film className="w-4 h-4" />
@@ -448,7 +448,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               onClick={() => setActiveTab('code')}
               title="Remotion Script Editor (VS Code TSX)"
               className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'code' ? 'bg-[#181920] text-[#facc15] border border-[#facc15]/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+                activeTab === 'code' ? 'bg-[#1e2028] text-white border border-zinc-700' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
               }`}
             >
               <Code className="w-4 h-4" />
@@ -458,7 +458,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               onClick={() => setActiveTab('copilot')}
               title="AI Motion Studio Copilot (Chat)"
               className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'copilot' ? 'bg-[#181920] text-[#facc15] border border-[#facc15]/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+                activeTab === 'copilot' ? 'bg-[#1e2028] text-white border border-zinc-700' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
               }`}
             >
               <MessageSquare className="w-4 h-4" />
@@ -474,7 +474,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
 
             <button
               onClick={() => setActiveTab('export')}
-              title="4K Render Engine Queue"
+              title="Export Studio"
               className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors cursor-pointer"
             >
               <Terminal className="w-4 h-4" />
@@ -486,7 +486,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
             <button
               onClick={() => setActiveTab('license')}
               title="Akun &amp; Lisensi Pro"
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-[#facc15] hover:bg-[#121316] transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors cursor-pointer"
             >
               <ShieldCheck className="w-4 h-4" />
             </button>
@@ -518,7 +518,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                 </button>
                 <button
                   onClick={() => setLeftSideMode('code')}
-                  className={`px-2 py-0.5 rounded transition-colors ${leftSideMode === 'code' ? 'bg-[#1c1d24] text-[#facc15]' : 'hover:text-white'}`}
+                  className={`px-2 py-0.5 rounded transition-colors ${leftSideMode === 'code' ? 'bg-[#1c1d24] text-white font-medium' : 'hover:text-white'}`}
                 >
                   VS Code
                 </button>
@@ -552,7 +552,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                     onClick={() => fileInputRef.current?.click()}
                     className="w-full py-2 bg-[#181920] hover:bg-[#22242c] border border-[#272832] rounded-lg text-xs font-semibold text-zinc-200 flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-sm"
                   >
-                    <Upload className="w-3.5 h-3.5 text-[#facc15]" />
+                    <Upload className="w-3.5 h-3.5 text-zinc-300" />
                     <span>Import Media (Foto/Video)</span>
                   </button>
 
@@ -610,14 +610,14 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                 <div className="flex-1 flex flex-col overflow-hidden bg-[#0c0d10]">
                   {/* File Tab & Sync Button */}
                   <div className="h-7 bg-[#141519] border-b border-[#1c1d22] px-2 flex items-center justify-between text-xs">
-                    <span className="font-mono text-[11px] text-[#facc15] font-semibold flex items-center gap-1">
-                      <FileText className="w-3 h-3" />
+                    <span className="font-mono text-[11px] text-zinc-300 font-medium flex items-center gap-1">
+                      <FileText className="w-3 h-3 text-zinc-400" />
                       <span>BrandIntro.tsx</span>
                     </span>
 
                     <button
                       onClick={handleApplyCodeToCanvas}
-                      className="px-2 py-0.5 rounded bg-[#facc15] hover:bg-[#fde047] text-zinc-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer"
+                      className="px-2 py-0.5 rounded bg-zinc-200 hover:bg-white text-zinc-950 font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
                       title="Sinkronkan kode ini ke player kanvas"
                     >
                       <RefreshCw className="w-2.5 h-2.5 stroke-[2.5]" />
@@ -637,7 +637,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       value={remotionCode}
                       onChange={(e) => setRemotionCode(e.target.value)}
                       spellCheck="false"
-                      className="flex-1 p-2 bg-transparent text-[10.5px] font-mono text-zinc-200 focus:outline-none resize-none leading-5 selection:bg-[#facc15]/20"
+                      className="flex-1 p-2 bg-transparent text-[10.5px] font-mono text-zinc-200 focus:outline-none resize-none leading-5 selection:bg-zinc-700"
                     />
                   </div>
                 </div>
@@ -762,7 +762,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
 
               <button
                 onClick={() => setIsPlaying(!isPlaying)}
-                className="px-2.5 py-0.5 rounded bg-[#facc15] hover:bg-[#fde047] text-zinc-950 font-bold flex items-center gap-1 cursor-pointer text-[11px]"
+                className="px-3 py-1 rounded bg-zinc-100 hover:bg-white text-zinc-950 font-bold flex items-center gap-1 cursor-pointer text-[11px] shadow-sm transition-colors"
               >
                 {isPlaying ? <Pause className="w-3 h-3 fill-zinc-950" /> : <Play className="w-3 h-3 fill-zinc-950" />}
                 <span>{isPlaying ? 'Pause' : 'Play'}</span>
@@ -778,7 +778,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
 
               <button
                 onClick={handleSplitClipAtPlayhead}
-                className="p-1.5 rounded hover:bg-[#16171d] text-zinc-400 hover:text-[#facc15] transition-colors ml-2"
+                className="p-1.5 rounded hover:bg-[#16171d] text-zinc-400 hover:text-white transition-colors ml-2"
                 title="Cut Frame (Split Clip) [Ctrl+B]"
               >
                 <Scissors className="w-3.5 h-3.5" />
@@ -787,7 +787,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
 
             {/* Timecode & Frame Readout */}
             <div className="font-mono text-zinc-300 text-[11px] flex items-center gap-2">
-              <span className="text-[#facc15] font-semibold">{formatTimecode(currentFrame)}</span>
+              <span className="text-zinc-100 font-semibold">{formatTimecode(currentFrame)}</span>
               <span className="text-zinc-600">/</span>
               <span className="text-zinc-400">{formatTimecode(maxFrames)}</span>
               <span className="px-1.5 py-0.2 rounded bg-[#14151a] border border-[#202126] text-[10px] text-zinc-400">
@@ -822,25 +822,25 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
             <div className="h-7 bg-[#09090b] border-b border-[#1c1d22] flex items-center px-2 gap-1 text-[11px] text-zinc-400 shrink-0">
               <button
                 onClick={() => setInspectorTab('transform')}
-                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'transform' ? 'bg-[#181920] text-[#facc15] font-medium' : 'hover:text-white'}`}
+                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'transform' ? 'bg-[#1b1c24] text-white font-medium' : 'hover:text-white'}`}
               >
                 Transform
               </button>
               <button
                 onClick={() => setInspectorTab('filters')}
-                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'filters' ? 'bg-[#181920] text-[#facc15] font-medium' : 'hover:text-white'}`}
+                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'filters' ? 'bg-[#1b1c24] text-white font-medium' : 'hover:text-white'}`}
               >
                 Filters
               </button>
               <button
                 onClick={() => setInspectorTab('text')}
-                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'text' ? 'bg-[#181920] text-[#facc15] font-medium' : 'hover:text-white'}`}
+                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'text' ? 'bg-[#1b1c24] text-white font-medium' : 'hover:text-white'}`}
               >
                 Text
               </button>
               <button
                 onClick={() => setInspectorTab('speed')}
-                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'speed' ? 'bg-[#181920] text-[#facc15] font-medium' : 'hover:text-white'}`}
+                className={`px-2 py-0.5 rounded transition-colors ${inspectorTab === 'speed' ? 'bg-[#1b1c24] text-white font-medium' : 'hover:text-white'}`}
               >
                 Speed
               </button>
@@ -863,7 +863,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="250"
                       value={zoomScale}
                       onChange={(e) => setZoomScale(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
 
@@ -878,7 +878,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="300"
                       value={posX}
                       onChange={(e) => setPosX(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
 
@@ -893,7 +893,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="300"
                       value={posY}
                       onChange={(e) => setPosY(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
 
@@ -908,7 +908,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="180"
                       value={rotation}
                       onChange={(e) => setRotation(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
 
@@ -923,7 +923,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="100"
                       value={opacity}
                       onChange={(e) => setOpacity(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
                 </div>
@@ -933,14 +933,14 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               {inspectorTab === 'filters' && (
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-[11px] text-zinc-400 font-semibold">Filter Visual After Effects:</label>
+                    <label className="text-[11px] text-zinc-400 font-semibold">Filter Visual:</label>
                     <div className="grid grid-cols-2 gap-1.5 pt-1">
                       {['none', 'dim', 'contrast', 'grayscale', 'invert'].map((f) => (
                         <button
                           key={f}
                           onClick={() => setActiveFilter(f)}
                           className={`p-1.5 rounded border text-[10.5px] uppercase font-mono transition-colors ${
-                            activeFilter === f ? 'bg-[#1b1c24] border-[#facc15] text-[#facc15] font-bold' : 'border-[#23242c] text-zinc-400 hover:text-white'
+                            activeFilter === f ? 'bg-[#1b1c24] border-zinc-400 text-white font-bold' : 'border-[#23242c] text-zinc-400 hover:text-white'
                           }`}
                         >
                           {f}
@@ -976,7 +976,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       max="200"
                       value={textScale}
                       onChange={(e) => setTextScale(parseInt(e.target.value, 10))}
-                      className="w-full accent-[#facc15]"
+                      className="w-full accent-zinc-200"
                     />
                   </div>
                 </div>
@@ -991,8 +991,8 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       <button
                         key={s}
                         onClick={() => handleSetSpeed(selectedClipId, s)}
-                        className={`flex-1 py-1 rounded text-xs border ${
-                          selectedClip.speed === s ? 'bg-[#facc15] text-zinc-950 font-bold border-[#facc15]' : 'border-[#23242c] text-zinc-300'
+                        className={`flex-1 py-1 rounded text-xs border transition-colors ${
+                          selectedClip.speed === s ? 'bg-zinc-100 text-zinc-950 font-bold border-zinc-100' : 'border-[#23242c] text-zinc-300 hover:bg-zinc-800'
                         }`}
                       >
                         {s}x
@@ -1032,10 +1032,10 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
             {/* Cut / Split Button */}
             <button
               onClick={handleSplitClipAtPlayhead}
-              className="px-2 py-0.5 rounded bg-[#181920] hover:bg-[#22242c] border border-[#272832] text-zinc-200 hover:text-[#facc15] flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer"
+              className="px-2 py-0.5 rounded bg-[#181920] hover:bg-[#22242c] border border-[#272832] text-zinc-200 hover:text-white flex items-center gap-1 text-[11px] font-semibold transition-colors cursor-pointer"
               title="Cut Frame (Split Clip pada Posisi Playhead) [Ctrl+B]"
             >
-              <Scissors className="w-3.5 h-3.5 text-[#facc15]" />
+              <Scissors className="w-3.5 h-3.5 text-zinc-300" />
               <span>Split</span>
             </button>
 
@@ -1082,7 +1082,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               onClick={handleToggleKeyframe}
               className={`px-2 py-0.5 rounded border text-[10.5px] font-mono flex items-center gap-1 cursor-pointer transition-colors ${
                 keyframePoints.includes(currentFrame)
-                  ? 'bg-amber-950/70 border-amber-500 text-amber-300 font-bold'
+                  ? 'bg-zinc-800 border-zinc-500 text-white font-bold'
                   : 'bg-[#14151a] border-[#202126] text-zinc-400 hover:text-white'
               }`}
               title="Tambah / Hapus Keyframe pada Frame Aktif"
@@ -1107,7 +1107,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               className="w-12 bg-[#09090b] border border-[#222328] px-1.5 py-0.5 rounded text-white text-center font-bold"
             />
             <span>/ {maxFrames}</span>
-            <span className="text-[#facc15] font-bold">({formatTimecode(currentFrame)})</span>
+            <span className="text-zinc-200 font-bold">({formatTimecode(currentFrame)})</span>
           </div>
 
           {/* Right Controls: Timeline Zoom & Drawer Toggle */}
@@ -1119,12 +1119,12 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               max="200"
               value={timelineZoom}
               onChange={(e) => setTimelineZoom(parseInt(e.target.value, 10))}
-              className="w-16 accent-[#facc15]"
+              className="w-16 accent-zinc-200"
             />
             <button
               onClick={() => setShowFrameDetail(!showFrameDetail)}
               className={`px-2 py-0.5 rounded border text-[10.5px] font-sans ${
-                showFrameDetail ? 'bg-[#181920] text-[#facc15] border-[#facc15]/50' : 'border-[#202126] text-zinc-400 hover:text-white'
+                showFrameDetail ? 'bg-[#1e2028] text-white border-zinc-600' : 'border-[#202126] text-zinc-400 hover:text-white'
               }`}
             >
               Detail Frame
@@ -1216,7 +1216,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                       style={{ left: `${leftPct}%`, width: `${widthPct}%` }}
                       className={`absolute h-10 rounded border flex items-center justify-between px-1.5 cursor-pointer shadow-sm transition-all ${
                         c.color
-                      } ${isSelected ? 'ring-2 ring-[#facc15] text-white' : 'text-zinc-300'}`}
+                      } ${isSelected ? 'ring-2 ring-zinc-300 text-white' : 'text-zinc-300'}`}
                       title="Klik untuk memilih. Klik kanan untuk opsi edit detail."
                     >
                       {/* Left Trim Handle */}
@@ -1226,11 +1226,11 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                           handleTrimStart(c.id, currentFrame);
                         }}
                         title="Tarik / Klik untuk Set In-Point ke Playhead"
-                        className="w-1.5 h-full bg-[#facc15]/80 -ml-1 cursor-col-resize hover:bg-[#facc15]"
+                        className="w-1.5 h-full bg-zinc-300/80 -ml-1 cursor-col-resize hover:bg-white"
                       />
 
                       <div className="flex items-center gap-1.5 truncate">
-                        <Film className="w-3 h-3 text-[#facc15] shrink-0" />
+                        <Film className="w-3 h-3 text-zinc-300 shrink-0" />
                         <span className="truncate text-[10px] font-mono">{c.name}</span>
                         <span className="text-[9px] text-zinc-500 font-mono">({c.endFrame - c.startFrame}f)</span>
                       </div>
@@ -1242,7 +1242,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                           handleTrimEnd(c.id, currentFrame);
                         }}
                         title="Tarik / Klik untuk Set Out-Point ke Playhead"
-                        className="w-1.5 h-full bg-[#facc15]/80 -mr-1 cursor-col-resize hover:bg-[#facc15]"
+                        className="w-1.5 h-full bg-zinc-300/80 -mr-1 cursor-col-resize hover:bg-white"
                       />
                     </div>
                   );
@@ -1281,7 +1281,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                 <span className="font-bold text-white uppercase text-[10px] tracking-wider">
                   Detail Frame Klip
                 </span>
-                <span className="font-mono text-[#facc15] text-[10px] truncate max-w-[90px]">
+                <span className="font-mono text-zinc-300 text-[10px] truncate max-w-[90px]">
                   {selectedClip.name}
                 </span>
               </div>
@@ -1328,8 +1328,8 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
                     <button
                       key={s}
                       onClick={() => handleSetSpeed(selectedClip.id, s)}
-                      className={`px-1.5 py-0.2 rounded text-[10px] border ${
-                        selectedClip.speed === s ? 'bg-[#facc15] text-zinc-950 font-bold border-[#facc15]' : 'border-[#222328] text-zinc-300'
+                      className={`px-1.5 py-0.2 rounded text-[10px] border transition-colors ${
+                        selectedClip.speed === s ? 'bg-zinc-100 text-zinc-950 font-bold border-zinc-100' : 'border-[#222328] text-zinc-300 hover:bg-zinc-800'
                       }`}
                     >
                       {s}x
@@ -1379,10 +1379,10 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               handleSplitClipAtPlayhead();
               setContextMenu(null);
             }}
-            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-[#facc15] flex items-center justify-between"
+            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-white flex items-center justify-between"
           >
             <span className="flex items-center gap-1.5">
-              <Scissors className="w-3.5 h-3.5 text-[#facc15]" />
+              <Scissors className="w-3.5 h-3.5 text-zinc-300" />
               <span>Potong pada Playhead</span>
             </span>
             <span className="text-[10px] text-zinc-500 font-mono">Ctrl+B</span>
@@ -1393,7 +1393,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               handleDuplicateClip(contextMenu.clipId);
               setContextMenu(null);
             }}
-            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-[#facc15] flex items-center justify-between"
+            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-white flex items-center justify-between"
           >
             <span className="flex items-center gap-1.5">
               <Copy className="w-3.5 h-3.5" />
@@ -1409,7 +1409,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               handleTrimStart(contextMenu.clipId, currentFrame);
               setContextMenu(null);
             }}
-            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-[#facc15] flex items-center gap-1.5"
+            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-white flex items-center gap-1.5"
           >
             <span>Set In-Point ke Playhead</span>
             <span className="text-[10px] text-zinc-500 font-mono ml-auto">[</span>
@@ -1420,7 +1420,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               handleTrimEnd(contextMenu.clipId, currentFrame);
               setContextMenu(null);
             }}
-            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-[#facc15] flex items-center gap-1.5"
+            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-white flex items-center gap-1.5"
           >
             <span>Set Out-Point ke Playhead</span>
             <span className="text-[10px] text-zinc-500 font-mono ml-auto">]</span>
@@ -1431,9 +1431,9 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
               handleToggleKeyframe();
               setContextMenu(null);
             }}
-            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-[#facc15] flex items-center gap-1.5"
+            className="w-full text-left px-3 py-1.5 hover:bg-[#1c1d24] hover:text-white flex items-center gap-1.5"
           >
-            <Diamond className="w-3.5 h-3.5 text-[#facc15]" />
+            <Diamond className="w-3.5 h-3.5 text-zinc-300" />
             <span>Tambah / Hapus Keyframe</span>
           </button>
 
@@ -1482,7 +1482,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
         </div>
         <div className="flex items-center gap-3">
           <span>Remotion v3.3</span>
-          <span className="text-[#facc15] font-bold">60 FPS Engine</span>
+          <span className="text-zinc-300 font-mono">60 FPS Engine</span>
           <span>UTF-8</span>
         </div>
       </div>

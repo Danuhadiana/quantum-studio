@@ -3,11 +3,17 @@ const path = require('path');
 const os = require('os');
 
 process.on('uncaughtException', (err) => {
-  dialog.showErrorBox('Quantum Studio Error', err.stack || err.message);
+  console.error('[UNCAUGHT EXCEPTION]', err);
+  if (dialog && typeof dialog.showErrorBox === 'function') {
+    try { dialog.showErrorBox('Quantum Studio Error', err.stack || err.message); } catch (e) {}
+  }
 });
 
 process.on('unhandledRejection', (reason) => {
-  dialog.showErrorBox('Quantum Studio Unhandled Rejection', String(reason));
+  console.error('[UNHANDLED REJECTION]', reason);
+  if (dialog && typeof dialog.showErrorBox === 'function') {
+    try { dialog.showErrorBox('Quantum Studio Unhandled Rejection', String(reason)); } catch (e) {}
+  }
 });
 
 let mainWindow = null;
