@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import DesktopHeader from './components/DesktopHeader';
 import WorkstationView from './components/WorkstationView';
-import LicenseModal from './components/LicenseModal';
-import ByoaSettingsModal from './components/ByoaSettingsModal';
 
 export default function App() {
   const [isPro, setIsPro] = useState(false);
   const [licenseKey, setLicenseKey] = useState('');
-  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  // Active Main Tab: 'player' | 'code' | 'copilot' | 'aihub' | 'settings' | 'license' | 'export'
+  const [activeTab, setActiveTab] = useState('player');
 
   useEffect(() => {
     const savedStatus = localStorage.getItem('qtm_license_status');
@@ -25,35 +23,26 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-[#0a0d14] text-slate-100 overflow-hidden font-sans">
+    <div className="h-screen w-screen flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden font-sans select-none">
       
-      {/* 1. TOP DESKTOP TITLEBAR / HEADER */}
+      {/* 1. TOP DESKTOP TITLEBAR / HEADER (VS Code Menu + Status) */}
       <DesktopHeader
         isPro={isPro}
         licenseKey={licenseKey}
-        onOpenLicenseModal={() => setIsLicenseModalOpen(true)}
-        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
       />
 
-      {/* 2. MAIN STUDIO WORKSTATION VIEW (4-PILLARS) */}
-      <WorkstationView
-        isPro={isPro}
-        onOpenLicenseModal={() => setIsLicenseModalOpen(true)}
-        onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
-      />
-
-      {/* 3. IN-APP PURCHASE & LICENSE ACTIVATION MODAL */}
-      <LicenseModal
-        isOpen={isLicenseModalOpen}
-        onClose={() => setIsLicenseModalOpen(false)}
-        onActivateSuccess={handleActivateSuccess}
-      />
-
-      {/* 4. BYOA SETTINGS MODAL */}
-      <ByoaSettingsModal
-        isOpen={isSettingsModalOpen}
-        onClose={() => setIsSettingsModalOpen(false)}
-      />
+      {/* 2. MAIN WORKSTATION VIEW (VS Code Activity Bar + Tabs + Remotion Studio Engine) */}
+      <div className="flex-1 w-full overflow-hidden flex flex-col">
+        <WorkstationView
+          isPro={isPro}
+          licenseKey={licenseKey}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          onActivateSuccess={handleActivateSuccess}
+        />
+      </div>
 
     </div>
   );
