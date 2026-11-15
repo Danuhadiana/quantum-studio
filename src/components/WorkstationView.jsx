@@ -6,7 +6,8 @@ import {
   ChevronLeft, ChevronRight, ChevronDown, ChevronUp, ZoomIn, ZoomOut,
   Folder, Film, Music, FileText, CornerUpLeft, Radio, SplitSquareVertical,
   Upload, Image, AlignLeft, Sparkle, Terminal, Settings, ShieldCheck,
-  Cpu, Activity, Check, Code, Layout, Palette
+  Cpu, Activity, Check, Code, Layout, Palette, Move, Crop, Type,
+  Pipette, Paintbrush, Eraser, Hand, Search, Square, Diamond, Clock
 } from 'lucide-react';
 import ClockLogo from './ClockLogo';
 import AiHubView from './views/AiHubView';
@@ -21,92 +22,104 @@ export default function WorkstationView({
   setActiveTab,
   onActivateSuccess
 }) {
-  // --- PANEL SIZING & COLLAPSE STATES ---
-  const [leftWidth, setLeftWidth] = useState(() => {
-    const saved = localStorage.getItem('qtm_left_width');
-    return saved ? parseInt(saved, 10) : 240;
-  });
-  const [rightWidth, setRightWidth] = useState(() => {
-    const saved = localStorage.getItem('qtm_right_width');
-    return saved ? parseInt(saved, 10) : 310;
-  });
-  const [bottomHeight, setBottomHeight] = useState(() => {
-    const saved = localStorage.getItem('qtm_bottom_height');
-    return saved ? parseInt(saved, 10) : 240;
-  });
+  // --- PHOTOSHOP ACTIVE TOOL ---
+  // 'move' | 'marquee' | 'razor' | 'text' | 'brush' | 'eraser' | 'hand' | 'zoom'
+  const [activeTool, setActiveTool] = useState('move');
 
-  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
-  const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const [isBottomCollapsed, setIsBottomCollapsed] = useState(false);
+  // --- RIGHT PANEL DOCK TABS ---
+  // Top: 'color' | 'swatches'
+  const [topRightTab, setTopRightTab] = useState('color');
+  // Bottom: 'layers' | 'adjustments' | 'properties'
+  const [bottomRightTab, setBottomRightTab] = useState('layers');
 
-  // Inspector & Bottom panel sub-tabs
-  const [activeLayer, setActiveLayer] = useState('media'); // 'media' | 'text' | 'composition'
-  const [bottomTab, setBottomTab] = useState('timeline'); // 'timeline' | 'console' | 'code'
+  // Color Swatches (Photoshop Style RGB Sliders)
+  const [colorR, setColorR] = useState(255);
+  const [colorG, setColorG] = useState(255);
+  const [colorB, setColorB] = useState(255);
+  const [foregroundColor, setForegroundColor] = useState('#ffffff');
+  const [backgroundColor, setBackgroundColor] = useState('#000000');
 
-  // --- UPLOADED MEDIA STATE (GAMBAR ATAU VIDEO YANG DI-EDIT) ---
+  // Sync RGB to Hex
+  const handleRgbChange = (r, g, b) => {
+    setColorR(r);
+    setColorG(g);
+    setColorB(b);
+    const hex = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+    setForegroundColor(hex);
+  };
+
+  // --- BOTTOM TIMELINE DOCK TABS ---
+  // 'timeline' | 'minibridge'
+  const [bottomDockTab, setBottomDockTab] = useState('timeline');
+  const [isTimelineExpanded, setIsTimelineExpanded] = useState(true);
+  const [timelineHeight, setTimelineHeight] = useState(230);
+
+  // --- CANVAS & MEDIA STATE (PURE BLACK CANVAS DEFAULT) ---
+  // "layarnya begitu hitam saja, jangan ada langsung gambar"
   const [uploadedMedia, setUploadedMedia] = useState(null); // { type: 'image' | 'video', url: string, name: string }
   const fileInputRef = useRef(null);
   const videoElementRef = useRef(null);
 
-  // Transform Properties untuk Media (Gambar / Video Upload)
+  // Layer Visibility & Locks
+  const [mediaVisible, setMediaVisible] = useState(true);
+  const [textVisible, setTextVisible] = useState(true);
+  const [layerOpacity, setLayerOpacity] = useState(100);
+  const [layerFill, setLayerFill] = useState(100);
+  const [blendMode, setBlendMode] = useState('normal');
+
+  // Transform Properties untuk Objek Canvas
   const [mediaPosX, setMediaPosX] = useState(0);
   const [mediaPosY, setMediaPosY] = useState(0);
   const [mediaScale, setMediaScale] = useState(100);
   const [mediaRotation, setMediaRotation] = useState(0);
   const [mediaOpacity, setMediaOpacity] = useState(100);
-  const [mediaFilter, setMediaFilter] = useState('none'); // 'none' | 'dim' | 'contrast' | 'grayscale'
+  const [mediaFilter, setMediaFilter] = useState('none'); // 'none' | 'dim' | 'contrast' | 'grayscale' | 'invert'
 
-  // Transform & Typography Properties untuk Teks Kustom
-  const [headlineText, setHeadlineText] = useState('Quantum Studio 4K');
-  const [subtitleText, setSubtitleText] = useState('Koding Animasi Remotion & Editing Video Modern');
+  // Text Overlay State
+  const [customText, setCustomText] = useState('');
   const [textPosX, setTextPosX] = useState(0);
   const [textPosY, setTextPosY] = useState(0);
   const [textScale, setTextScale] = useState(100);
-  const [textOpacity, setTextOpacity] = useState(100);
-  const [textColor, setTextColor] = useState('#ffffff');
-  const [showLogoOnCanvas, setShowLogoOnCanvas] = useState(true);
 
-  // --- VIDEO PLAYER & REAL-TIME ENGINE STATE ---
+  // --- TIMELINE PLAYHEAD, SLIDE & FRAME ENGINE ---
   const [isPlaying, setIsPlaying] = useState(false);
-  const [aspectRatio, setAspectRatio] = useState('16:9'); // '16:9' or '9:16'
   const [currentFrame, setCurrentFrame] = useState(0);
   const maxFrames = 180; // 3 detik @ 60 FPS
   const fps = 60;
-  const [volume, setVolume] = useState(85);
-  const [isMuted, setIsMuted] = useState(false);
-  const [canvasZoom, setCanvasZoom] = useState('fit'); // 'fit', '50', '100', '200'
+  const [timelineZoom, setTimelineZoom] = useState(100); // 100% to 300%
 
   // Multi-Track Timeline Clips State
-  const [videoClips, setVideoClips] = useState([
-    { id: 1, name: 'Brand_Intro_4K.mp4', startFrame: 0, endFrame: 180, color: 'bg-zinc-800 border-zinc-700' }
+  const [clips, setClips] = useState([
+    {
+      id: 1,
+      name: 'Video_Layer_Track_1',
+      startFrame: 0,
+      endFrame: 180,
+      speed: 1.0,
+      fadeIn: 0,
+      fadeOut: 0,
+      color: 'bg-[#3c424d] border-[#555d6b]'
+    }
   ]);
   const [selectedClipId, setSelectedClipId] = useState(1);
+  const [keyframePoints, setKeyframePoints] = useState([0, 90, 180]); // Keyframe marker diamonds
+  const [showFrameDetailModal, setShowFrameDetailModal] = useState(true); // Panel detail frame di timeline
 
-  // --- AI CHAT & GEMINI INTEGRATION STATE ---
-  const [promptInput, setPromptInput] = useState('');
-  const [isAiGenerating, setIsAiGenerating] = useState(false);
-  const [chatMessages, setChatMessages] = useState([]); // Bersih / kosong saat pertama buka
-
-  // Live Remotion Code Content
-  const [remotionCode, setRemotionCode] = useState(`import { Composition, interpolate, spring, useCurrentFrame } from 'remotion';
-
-export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
-  const frame = useCurrentFrame();
-  const opacity = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: 'clamp' });
-  const scale = spring({ frame, fps: 60, config: { damping: 12, mass: 0.8 } });
-
-  return (
-    <div style={{ opacity, transform: \`scale(\${scale})\` }} className="flex flex-col items-center justify-center h-full w-full bg-black text-white">
-      <h1 className="text-6xl font-black tracking-tight">{title}</h1>
-      <p className="text-zinc-400 mt-2 text-lg">Next-Gen Programmatic Video Engine</p>
-    </div>
-  );
-};`);
-
-  // Ref untuk timeline scrubbing
   const timelineRulerRef = useRef(null);
+  const isDraggingPlayhead = useRef(false);
 
-  // --- 1. MEDIA UPLOAD HANDLER ---
+  // Format Timecode: HH:MM:SS:FF
+  const formatTimecode = (frame) => {
+    const totalSeconds = Math.floor(frame / fps);
+    const f = frame % fps;
+    const s = totalSeconds % 60;
+    const m = Math.floor(totalSeconds / 60) % 60;
+    const h = Math.floor(totalSeconds / 3600);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(f)}`;
+  };
+
+  // --- 1. MEDIA IMPORT HANDLER ---
   const handleMediaFileChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -120,17 +133,19 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
       name: file.name
     });
 
-    setVideoClips([
+    setClips([
       {
         id: Date.now(),
         name: file.name,
         startFrame: 0,
         endFrame: maxFrames,
-        color: 'bg-zinc-800 border-zinc-700'
+        speed: 1.0,
+        fadeIn: 0,
+        fadeOut: 0,
+        color: 'bg-[#2d4059] border-[#435e82]'
       }
     ]);
 
-    setActiveLayer('media');
     setIsPlaying(false);
   };
 
@@ -147,14 +162,14 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
     setMediaFilter('none');
   };
 
-  // --- 2. PLAYBACK TIMER ENGINE (60 FPS Real-Time) ---
+  // --- 2. 60 FPS REAL-TIME PLAYBACK TIMER ---
   useEffect(() => {
     let interval = null;
     if (isPlaying) {
       interval = setInterval(() => {
         setCurrentFrame((prev) => {
           if (prev >= maxFrames) {
-            return 0; // Loop kembali ke awal
+            return 0; // Loop kembali ke frame 0
           }
           return prev + 1;
         });
@@ -165,7 +180,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
     };
   }, [isPlaying, maxFrames, fps]);
 
-  // Sinkronkan video playback dengan isPlaying
+  // Video element sync
   useEffect(() => {
     if (videoElementRef.current && uploadedMedia?.type === 'video') {
       if (isPlaying) {
@@ -176,104 +191,7 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
     }
   }, [isPlaying, uploadedMedia]);
 
-  // Format Frame ke Timecode (HH:MM:SS:FF)
-  const formatTimecode = (frame) => {
-    const totalSeconds = Math.floor(frame / fps);
-    const f = frame % fps;
-    const s = totalSeconds % 60;
-    const m = Math.floor(totalSeconds / 60) % 60;
-    const h = Math.floor(totalSeconds / 3600);
-    const pad = (n) => String(n).padStart(2, '0');
-    return `${pad(h)}:${pad(m)}:${pad(s)}:${pad(f)}`;
-  };
-
-  // --- 3. DRAGGABLE SPLITTER LOGIC ---
-  const isDraggingLeft = useRef(false);
-  const isDraggingRight = useRef(false);
-  const isDraggingBottom = useRef(false);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      if (isDraggingLeft.current) {
-        const newWidth = Math.max(180, Math.min(380, e.clientX));
-        setLeftWidth(newWidth);
-        localStorage.setItem('qtm_left_width', newWidth.toString());
-      }
-      if (isDraggingRight.current) {
-        const newWidth = Math.max(250, Math.min(480, window.innerWidth - e.clientX));
-        setRightWidth(newWidth);
-        localStorage.setItem('qtm_right_width', newWidth.toString());
-      }
-      if (isDraggingBottom.current) {
-        const newHeight = Math.max(130, Math.min(420, window.innerHeight - e.clientY));
-        setBottomHeight(newHeight);
-        localStorage.setItem('qtm_bottom_height', newHeight.toString());
-      }
-    };
-
-    const handleMouseUp = () => {
-      isDraggingLeft.current = false;
-      isDraggingRight.current = false;
-      isDraggingBottom.current = false;
-      document.body.style.cursor = 'default';
-      document.body.style.userSelect = 'auto';
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, []);
-
-  const handleStartDragLeft = (e) => {
-    e.preventDefault();
-    isDraggingLeft.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  };
-
-  const handleStartDragRight = (e) => {
-    e.preventDefault();
-    isDraggingRight.current = true;
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-  };
-
-  const handleStartDragBottom = (e) => {
-    e.preventDefault();
-    isDraggingBottom.current = true;
-    document.body.style.cursor = 'row-resize';
-    document.body.style.userSelect = 'none';
-  };
-
-  // --- 4. SCISSORS / SPLIT CLIP TOOL ---
-  const handleSplitClipAtPlayhead = () => {
-    const targetClip = videoClips.find(
-      (c) => c.id === selectedClipId && currentFrame > c.startFrame && currentFrame < c.endFrame
-    );
-    if (!targetClip) return;
-
-    const originalEnd = targetClip.endFrame;
-    const splitPoint = currentFrame;
-
-    setVideoClips((prev) => {
-      const updated = prev.map((c) =>
-        c.id === targetClip.id ? { ...c, endFrame: splitPoint, name: `${c.name} (Part 1)` } : c
-      );
-      const newPart = {
-        id: Date.now(),
-        name: `${targetClip.name.replace(' (Part 1)', '')} (Part 2)`,
-        startFrame: splitPoint,
-        endFrame: originalEnd,
-        color: 'bg-zinc-800 border-zinc-600'
-      };
-      return [...updated, newPart];
-    });
-  };
-
-  // --- 5. TIMELINE SCRUBBING ---
+  // --- 3. SLIDE FRAME (DRAGGABLE SCRUBBER) ---
   const handleTimelineScrub = (e) => {
     if (!timelineRulerRef.current) return;
     const rect = timelineRulerRef.current.getBoundingClientRect();
@@ -283,101 +201,105 @@ export const BrandIntro = ({ title = "Quantum Studio 4K" }) => {
     setCurrentFrame(targetFrame);
   };
 
-  // --- 6. AI PROMPT / GEMINI INTEGRATION ---
-  const handleSendPrompt = async (e) => {
-    if (e) e.preventDefault();
-    if (!promptInput.trim() || isAiGenerating) return;
+  const handleStartPlayheadDrag = (e) => {
+    e.preventDefault();
+    isDraggingPlayhead.current = true;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
 
-    const userText = promptInput.trim();
-    setPromptInput('');
-
-    const newMsg = {
-      id: Date.now(),
-      sender: 'user',
-      text: userText,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    const onMove = (moveEvent) => {
+      if (!isDraggingPlayhead.current || !timelineRulerRef.current) return;
+      const rect = timelineRulerRef.current.getBoundingClientRect();
+      const clickX = Math.max(0, Math.min(moveEvent.clientX - rect.left, rect.width));
+      const fraction = clickX / rect.width;
+      const targetFrame = Math.round(fraction * maxFrames);
+      setCurrentFrame(targetFrame);
     };
-    setChatMessages((prev) => [...prev, newMsg]);
-    setIsAiGenerating(true);
 
-    try {
-      const apiKey = localStorage.getItem('qtm_gemini_key') || import.meta.env.VITE_GEMINI_API_KEY || '';
-      
-      if (!apiKey) {
-        setTimeout(() => {
-          setIsAiGenerating(false);
-          setChatMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now() + 1,
-              sender: 'assistant',
-              name: 'Quantum Copilot',
-              text: `Perintah diterima: "${userText}".\n\nUntuk mengaktifkan inferensi AI langsung, silakan masukkan kunci API Anda di tab Multi-AI Hub. Judul canvas telah diperbarui ke "${userText}".`,
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ]);
-          setHeadlineText(userText.substring(0, 40));
-        }, 700);
-        return;
-      }
+    const onUp = () => {
+      isDraggingPlayhead.current = false;
+      document.body.style.cursor = 'default';
+      document.body.style.userSelect = 'auto';
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-      const payload = {
-        contents: [
-          {
-            parts: [
-              {
-                text: `Anda adalah Motion Graphics Director & Remotion Video Coder di Quantum Studio.
-Instruksi Pengguna: "${userText}"
-Format Jawaban:
-1. Rekomendasi Headline: (singkat)
-2. Subtitle: (singkat)
-3. Rekomendasi Efek Remotion: (spring / scale / opacity)`
-              }
-            ]
-          }
-        ]
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
+
+  // --- 4. CUT FRAME (RAZOR / SPLIT CLIP PADA PLAYHEAD) ---
+  const handleCutFrameAtPlayhead = () => {
+    const targetClip = clips.find(
+      (c) => c.id === selectedClipId && currentFrame > c.startFrame && currentFrame < c.endFrame
+    );
+    if (!targetClip) {
+      // Jika klip yang dipilih tidak pas, coba potong klip apapun di bawah playhead
+      const anyClip = clips.find((c) => currentFrame > c.startFrame && currentFrame < c.endFrame);
+      if (!anyClip) return;
+      executeSplit(anyClip);
+      return;
+    }
+    executeSplit(targetClip);
+  };
+
+  const executeSplit = (clipToSplit) => {
+    const originalEnd = clipToSplit.endFrame;
+    const splitPoint = currentFrame;
+
+    setClips((prev) => {
+      const updated = prev.map((c) =>
+        c.id === clipToSplit.id
+          ? { ...c, endFrame: splitPoint, name: `${c.name.replace(/ \(Part \d+\)/, '')} (Part 1)` }
+          : c
+      );
+      const newPart = {
+        id: Date.now(),
+        name: `${clipToSplit.name.replace(/ \(Part \d+\)/, '')} (Part 2)`,
+        startFrame: splitPoint,
+        endFrame: originalEnd,
+        speed: clipToSplit.speed || 1.0,
+        fadeIn: 0,
+        fadeOut: 0,
+        color: 'bg-[#40354a] border-[#625272]'
       };
+      return [...updated, newPart];
+    });
 
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error('API Respon Gagal');
-      const data = await res.json();
-      const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'Video dikonfigurasi.';
-
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'assistant',
-          name: 'Gemini 2.0 Flash',
-          text: reply,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-
-      setHeadlineText(userText.substring(0, 35));
-    } catch {
-      setChatMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          sender: 'assistant',
-          name: 'Quantum Engine',
-          text: `Instruksi diterima: "${userText}".\nParameter animasi telah disesuaikan di timeline.`,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-    } finally {
-      setIsAiGenerating(false);
+    // Otomatis tandai titik keyframe cut
+    if (!keyframePoints.includes(splitPoint)) {
+      setKeyframePoints((prev) => [...prev, splitPoint].sort((a, b) => a - b));
     }
   };
 
-  // --- RENDER DEDICATED FULL-PAGE VIEWS (ZERO MODAL) ---
+  // --- 5. EDIT FRAME SECARA DETAIL ---
+  const handleTrimClipStart = (clipId, newStart) => {
+    setClips((prev) =>
+      prev.map((c) => (c.id === clipId ? { ...c, startFrame: Math.max(0, Math.min(newStart, c.endFrame - 5)) } : c))
+    );
+  };
+
+  const handleTrimClipEnd = (clipId, newEnd) => {
+    setClips((prev) =>
+      prev.map((c) => (c.id === clipId ? { ...c, endFrame: Math.min(maxFrames, Math.max(newEnd, c.startFrame + 5)) } : c))
+    );
+  };
+
+  const handleSetClipSpeed = (clipId, speed) => {
+    setClips((prev) => prev.map((c) => (c.id === clipId ? { ...c, speed } : c)));
+  };
+
+  const handleToggleKeyframeAtCurrent = () => {
+    if (keyframePoints.includes(currentFrame)) {
+      setKeyframePoints((prev) => prev.filter((f) => f !== currentFrame));
+    } else {
+      setKeyframePoints((prev) => [...prev, currentFrame].sort((a, b) => a - b));
+    }
+  };
+
+  const selectedClip = clips.find((c) => c.id === selectedClipId) || clips[0];
+
+  // Render Full-Page Views (Zero Modal) jika tab selain player aktif
   if (activeTab === 'aihub') {
     return <AiHubView onSwitchToPlayer={() => setActiveTab('player')} />;
   }
@@ -398,835 +320,889 @@ Format Jawaban:
     return <ExportQueueView isPro={isPro} onSwitchToPlayer={() => setActiveTab('player')} />;
   }
 
-  // --- MAIN STUDIO & CODE VIEWPORT (VS CODE + REMOTION LAYOUT) ---
   return (
-    <div className="h-full w-full flex flex-col bg-[#09090b] text-zinc-100 overflow-hidden select-none">
+    <div className="h-full w-full flex flex-col bg-[#1e1e1e] text-[#dcdcdc] overflow-hidden select-none font-sans">
       
-      {/* 1. MAIN BODY: ACTIVITY BAR + RESIZABLE PANELS */}
+      {/* 1. MAIN WORKSPACE ROW (TOOL PALETTE + BLACK CANVAS + RIGHT DOCKS) */}
       <div className="flex-1 w-full flex overflow-hidden">
         
-        {/* --- VS CODE ACTIVITY BAR (FAR LEFT STRIP - 44px) --- */}
-        <aside className="w-11 h-full bg-[#09090b] border-r border-[#1c1d22] flex flex-col items-center py-2 justify-between shrink-0 z-30">
-          {/* Top Activity Icons */}
-          <div className="flex flex-col items-center gap-1.5 w-full">
+        {/* --- PHOTOSHOP LEFT VERTICAL TOOL PALETTE (2-COLUMN CS6 STYLE) --- */}
+        <aside className="w-12 bg-[#262626] border-r border-[#1c1c1c] flex flex-col items-center py-2 shrink-0 z-30 select-none shadow-md">
+          {/* Tool Icons Grid */}
+          <div className="grid grid-cols-2 gap-1 px-1">
+            
+            {/* Move Tool (V) */}
             <button
-              onClick={() => setActiveTab('player')}
-              title="Remotion Studio Player (Canvas & Timeline)"
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'player' ? 'bg-[#181920] text-amber-400 border border-amber-400/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+              onClick={() => setActiveTool('move')}
+              title="Move Tool (V)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'move' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
               }`}
             >
-              <Film className="w-4 h-4" />
+              <Move className="w-3.5 h-3.5" />
             </button>
 
+            {/* Marquee Tool (M) */}
             <button
-              onClick={() => setActiveTab('code')}
-              title="Skrip Koding Remotion (TSX / JSX)"
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'code' ? 'bg-[#181920] text-amber-400 border border-amber-400/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+              onClick={() => setActiveTool('marquee')}
+              title="Rectangular Marquee Tool (M)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'marquee' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
               }`}
             >
-              <Code className="w-4 h-4" />
+              <Square className="w-3.5 h-3.5 stroke-[1.5]" />
             </button>
 
+            {/* Razor / Split Frame Tool (C) */}
             <button
-              onClick={() => setActiveTab('copilot')}
-              title="Motion Director Copilot (AI Chat)"
-              className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors cursor-pointer ${
-                activeTab === 'copilot' ? 'bg-[#181920] text-amber-400 border border-amber-400/30' : 'text-zinc-500 hover:text-zinc-200 hover:bg-[#121316]'
+              onClick={() => {
+                setActiveTool('razor');
+                handleCutFrameAtPlayhead();
+              }}
+              title="Cut Frame / Razor Split Tool (C)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'razor' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
               }`}
             >
-              <MessageSquare className="w-4 h-4" />
+              <Scissors className="w-3.5 h-3.5" />
             </button>
 
+            {/* Crop Tool */}
             <button
-              onClick={() => setActiveTab('aihub')}
-              title="Multi-AI Engine Hub (BYOA)"
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors cursor-pointer"
+              onClick={() => setActiveTool('crop')}
+              title="Crop Tool (C)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'crop' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
             >
-              <Cpu className="w-4 h-4" />
+              <Crop className="w-3.5 h-3.5" />
             </button>
 
+            {/* Eyedropper (I) */}
             <button
-              onClick={() => setActiveTab('export')}
-              title="4K Render Engine Queue"
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors cursor-pointer"
+              onClick={() => setActiveTool('eyedropper')}
+              title="Eyedropper Tool (I)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'eyedropper' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
             >
-              <Terminal className="w-4 h-4" />
+              <Pipette className="w-3.5 h-3.5" />
             </button>
+
+            {/* Brush Tool (B) */}
+            <button
+              onClick={() => setActiveTool('brush')}
+              title="Brush Tool (B)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'brush' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
+            >
+              <Paintbrush className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Eraser Tool (E) */}
+            <button
+              onClick={() => setActiveTool('eraser')}
+              title="Eraser Tool (E)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'eraser' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
+            >
+              <Eraser className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Type / Text Tool (T) */}
+            <button
+              onClick={() => {
+                setActiveTool('text');
+                const userT = prompt('Masukkan teks layer:', customText || 'Teks Animasi Quantum');
+                if (userT !== null) setCustomText(userT);
+              }}
+              title="Horizontal Type Tool (T)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'text' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
+            >
+              <Type className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Import Media File Tool */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              title="Import Media (Foto/Video) ke Canvas"
+              className="w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 text-amber-400 hover:text-amber-200 hover:bg-[#333333] transition-colors cursor-pointer"
+            >
+              <Upload className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Hand Tool (H) */}
+            <button
+              onClick={() => setActiveTool('hand')}
+              title="Hand Tool (H)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'hand' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
+            >
+              <Hand className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Zoom Tool (Z) */}
+            <button
+              onClick={() => setActiveTool('zoom')}
+              title="Zoom Tool (Z)"
+              className={`w-4.5 h-4.5 rounded-sm flex items-center justify-center p-0.5 transition-colors cursor-pointer ${
+                activeTool === 'zoom' ? 'bg-[#3879d9] text-white' : 'text-zinc-400 hover:text-white hover:bg-[#333333]'
+              }`}
+            >
+              <Search className="w-3.5 h-3.5" />
+            </button>
+
           </div>
 
-          {/* Bottom Activity Icons */}
-          <div className="flex flex-col items-center gap-1.5 w-full">
-            <button
-              onClick={() => setActiveTab('license')}
-              title="Akun & Lisensi Pro"
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-amber-400 hover:bg-[#121316] transition-colors cursor-pointer"
-            >
-              <ShieldCheck className="w-4 h-4" />
-            </button>
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleMediaFileChange}
+            accept="image/*,video/*"
+            className="hidden"
+          />
 
-            <button
-              onClick={() => setActiveTab('settings')}
-              title="Pengaturan Studio (VS Code Preferences)"
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-zinc-500 hover:text-zinc-200 hover:bg-[#121316] transition-colors cursor-pointer"
-            >
-              <Settings className="w-4 h-4" />
-            </button>
+          {/* Foreground & Background Color Chips (Photoshop Swatch) */}
+          <div className="mt-auto mb-2 relative w-7 h-7">
+            {/* Background Color Chip */}
+            <div
+              style={{ backgroundColor: backgroundColor }}
+              className="absolute right-0 bottom-0 w-4.5 h-4.5 border border-[#444444] rounded-xs shadow cursor-pointer"
+              title="Background Color (Hitam)"
+            />
+            {/* Foreground Color Chip */}
+            <div
+              style={{ backgroundColor: foregroundColor }}
+              className="absolute left-0 top-0 w-4.5 h-4.5 border border-[#555555] rounded-xs shadow cursor-pointer z-10"
+              title="Foreground Color (Putih)"
+            />
           </div>
         </aside>
 
-        {/* --- FULL CODE EDITOR TAB VIEW --- */}
-        {activeTab === 'code' && (
-          <div className="flex-1 flex flex-col bg-[#0d0e12] overflow-hidden">
-            {/* Editor Tabs */}
-            <div className="h-8 bg-[#09090b] border-b border-[#1c1d22] flex items-center px-2 gap-1 text-xs">
-              <div className="px-3 py-1 bg-[#0d0e12] text-amber-400 border-t-2 border-amber-400 font-mono font-medium flex items-center gap-2">
-                <FileText className="w-3.5 h-3.5" />
-                <span>BrandIntro.tsx</span>
+        {/* --- CENTER WORKSPACE: PURE BLACK CANVAS VIEWPORT --- */}
+        {/* "layarnya begitu hitam saja, jangan ada lanusng gambar" */}
+        <main className="flex-1 h-full flex flex-col bg-[#1e1e1e] overflow-hidden relative">
+          
+          {/* Viewport Frame Header Tabs */}
+          <div className="h-6 bg-[#262626] border-b border-[#1c1c1c] flex items-center px-2 text-[11px] text-zinc-400 justify-between shrink-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-zinc-200 font-semibold">Untitled-1 @ 100% (RGB/8#)</span>
+              <span className="text-[10px] text-zinc-500 font-mono">1920 × 1080 (16:9)</span>
+            </div>
+            <div className="font-mono text-[10px] text-zinc-400">
+              Frame: <strong className="text-amber-400">{currentFrame}</strong> / {maxFrames} ({formatTimecode(currentFrame)})
+            </div>
+          </div>
+
+          {/* Canvas Working Field */}
+          <div className="flex-1 flex items-center justify-center p-6 overflow-hidden bg-[#1e1e1e] relative">
+            
+            {/* PURE BLACK CANVAS RECTANGLE (HITAM POLOS SESUAI PERMINTAAN USER) */}
+            <div
+              className="aspect-video w-full max-w-4xl max-h-[82%] bg-[#000000] border border-[#333333] shadow-2xl relative overflow-hidden flex items-center justify-center transition-all"
+              style={{
+                boxShadow: '0 20px 50px rgba(0,0,0,0.8)'
+              }}
+            >
+              {/* Center Screen: Hanya Hitam Polos Tanpa Gambar Acak / Template default */}
+              
+              {/* JIKA USER MENGUNGGAH MEDIA BARULAH MEDIA TAMPIL */}
+              {uploadedMedia && mediaVisible && (
+                <div
+                  style={{
+                    transform: `translate(${mediaPosX}px, ${mediaPosY}px) scale(${mediaScale / 100}) rotate(${mediaRotation}deg)`,
+                    opacity: (mediaOpacity / 100) * (layerOpacity / 100),
+                    filter:
+                      mediaFilter === 'dim' ? 'brightness(0.6)' :
+                      mediaFilter === 'contrast' ? 'contrast(1.4)' :
+                      mediaFilter === 'grayscale' ? 'grayscale(1)' :
+                      mediaFilter === 'invert' ? 'invert(1)' : 'none'
+                  }}
+                  className="absolute inset-0 flex items-center justify-center transition-transform duration-75"
+                >
+                  {uploadedMedia.type === 'video' ? (
+                    <video
+                      ref={videoElementRef}
+                      src={uploadedMedia.url}
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <img
+                      src={uploadedMedia.url}
+                      alt="Uploaded File"
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+              )}
+
+              {/* JIKA USER MENAMBAHKAN TEKS BARULAH TEKS MUNCUL */}
+              {customText && textVisible && (
+                <div
+                  style={{
+                    transform: `translate(${textPosX}px, ${textPosY}px) scale(${textScale / 100})`,
+                    color: foregroundColor
+                  }}
+                  className="absolute z-20 text-center font-bold px-4 pointer-events-none drop-shadow-lg"
+                >
+                  <div className="text-2xl font-black">{customText}</div>
+                </div>
+              )}
+
+              {/* Faint Center Crosshair Guide (Photoshop Center Guide) */}
+              <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-10">
+                <div className="w-8 h-px bg-white"></div>
+                <div className="h-8 w-px bg-white absolute"></div>
               </div>
-              <button
-                onClick={() => setActiveTab('player')}
-                className="px-3 py-1 text-zinc-400 hover:text-zinc-200 font-mono flex items-center gap-2 transition-colors"
-              >
-                <span>Composition.tsx (Preview)</span>
-              </button>
             </div>
 
-            {/* Code Body */}
-            <div className="flex-1 flex overflow-hidden">
-              {/* Line Numbers */}
-              <div className="w-12 bg-[#09090b] text-zinc-600 font-mono text-xs py-3 text-right pr-3 select-none shrink-0 border-r border-[#1c1d22]">
-                {Array.from({ length: 24 }).map((_, i) => (
-                  <div key={i} className="leading-6">{i + 1}</div>
+          </div>
+
+        </main>
+
+        {/* --- PHOTOSHOP RIGHT DOCKED PANELS (COLOR, ADJUSTMENTS, LAYERS) --- */}
+        <aside className="w-64 bg-[#2b2b2b] border-l border-[#1c1c1c] flex flex-col shrink-0 text-xs select-none shadow-md z-30">
+          
+          {/* PANEL 1 (TOP): COLOR & SWATCHES */}
+          <div className="border-b border-[#202020] flex flex-col shrink-0">
+            <div className="h-6 bg-[#262626] border-b border-[#1c1c1c] px-2 flex items-center justify-between text-[11px] text-zinc-400">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setTopRightTab('color')}
+                  className={`font-semibold ${topRightTab === 'color' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                  Color
+                </button>
+                <span className="text-zinc-700">|</span>
+                <button
+                  onClick={() => setTopRightTab('swatches')}
+                  className={`font-semibold ${topRightTab === 'swatches' ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}
+                >
+                  Swatches
+                </button>
+              </div>
+            </div>
+
+            {topRightTab === 'color' ? (
+              <div className="p-2.5 space-y-2 text-[11px]">
+                {/* RGB Sliders (Photoshop Style) */}
+                <div className="space-y-1.5 font-mono">
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 text-red-400 font-bold">R</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={colorR}
+                      onChange={(e) => handleRgbChange(parseInt(e.target.value, 10), colorG, colorB)}
+                      className="flex-1 accent-red-500 h-1 bg-[#1a1a1a] rounded"
+                    />
+                    <span className="w-6 text-right text-zinc-300">{colorR}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 text-emerald-400 font-bold">G</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={colorG}
+                      onChange={(e) => handleRgbChange(colorR, parseInt(e.target.value, 10), colorB)}
+                      className="flex-1 accent-emerald-500 h-1 bg-[#1a1a1a] rounded"
+                    />
+                    <span className="w-6 text-right text-zinc-300">{colorG}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="w-3 text-blue-400 font-bold">B</span>
+                    <input
+                      type="range"
+                      min="0"
+                      max="255"
+                      value={colorB}
+                      onChange={(e) => handleRgbChange(colorR, colorG, parseInt(e.target.value, 10))}
+                      className="flex-1 accent-blue-500 h-1 bg-[#1a1a1a] rounded"
+                    />
+                    <span className="w-6 text-right text-zinc-300">{colorB}</span>
+                  </div>
+                </div>
+
+                {/* Color Spectrum Ramp */}
+                <div
+                  className="h-3 w-full rounded-xs border border-[#444444]"
+                  style={{
+                    background: 'linear-gradient(to right, red, yellow, lime, cyan, blue, magenta, red)'
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="p-2.5 grid grid-cols-6 gap-1">
+                {['#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#00ffff', '#ff00ff', '#888888', '#facc15', '#e11d48', '#10b981'].map((c) => (
+                  <div
+                    key={c}
+                    onClick={() => setForegroundColor(c)}
+                    style={{ backgroundColor: c }}
+                    className="w-5 h-5 rounded-xs border border-[#444444] cursor-pointer hover:scale-110 transition-transform"
+                  />
                 ))}
               </div>
-
-              {/* Code TextArea */}
-              <textarea
-                value={remotionCode}
-                onChange={(e) => setRemotionCode(e.target.value)}
-                spellCheck="false"
-                className="flex-1 p-3 bg-transparent text-xs font-mono text-zinc-200 focus:outline-none resize-none leading-6 selection:bg-amber-400/20"
-              />
-            </div>
+            )}
           </div>
-        )}
 
-        {/* --- FULL AI COPILOT CHAT VIEW --- */}
-        {activeTab === 'copilot' && (
-          <div className="flex-1 flex flex-col bg-[#0d0e12] overflow-hidden">
-            <div className="h-8 bg-[#09090b] border-b border-[#1c1d22] flex items-center px-3 text-xs text-zinc-400 justify-between">
-              <span className="font-semibold text-white flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                AI Motion Studio Chat (Google Gemini &amp; Claude)
-              </span>
+          {/* PANEL 2 (MIDDLE): ADJUSTMENTS */}
+          <div className="border-b border-[#202020] p-2 space-y-1.5 shrink-0">
+            <div className="text-[10px] uppercase font-bold text-zinc-400 tracking-wider">
+              Adjustments
+            </div>
+            <div className="flex items-center gap-1.5">
               <button
-                onClick={() => setActiveTab('player')}
-                className="text-[11px] text-amber-400 hover:underline"
+                onClick={() => setMediaFilter('none')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${mediaFilter === 'none' ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-400 hover:text-white'}`}
               >
-                Buka Canvas
+                Normal
+              </button>
+              <button
+                onClick={() => setMediaFilter('grayscale')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${mediaFilter === 'grayscale' ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-400 hover:text-white'}`}
+              >
+                B&amp;W
+              </button>
+              <button
+                onClick={() => setMediaFilter('dim')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${mediaFilter === 'dim' ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-400 hover:text-white'}`}
+              >
+                Dim
+              </button>
+              <button
+                onClick={() => setMediaFilter('contrast')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${mediaFilter === 'contrast' ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-400 hover:text-white'}`}
+              >
+                Contrast
+              </button>
+              <button
+                onClick={() => setMediaFilter('invert')}
+                className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${mediaFilter === 'invert' ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-400 hover:text-white'}`}
+              >
+                Invert
               </button>
             </div>
+          </div>
 
-            <div className="flex-1 p-6 overflow-y-auto max-w-3xl mx-auto w-full space-y-4">
-              {chatMessages.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-zinc-500">
-                  <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-center mb-3">
-                    <Sparkles className="w-6 h-6 text-amber-400" />
-                  </div>
-                  <h3 className="text-base font-bold text-white">Apa yang ingin kita buat hari ini?</h3>
-                  <p className="text-xs text-zinc-400 max-w-md mt-1">
-                    Ketik perintah naskah video animasi, transformasi objek, atau skrip kode Remotion React di bawah.
-                  </p>
-                </div>
-              ) : (
-                chatMessages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`p-3.5 rounded-xl text-xs max-w-xl ${
-                      msg.sender === 'user'
-                        ? 'bg-[#181920] border border-[#23242b] text-white ml-auto'
-                        : 'bg-[#121317] border border-[#1e1f25] text-zinc-300'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between text-[10px] text-zinc-500 mb-1 font-mono">
-                      <span>{msg.name || 'Anda'}</span>
-                      <span>{msg.time}</span>
-                    </div>
-                    <div className="whitespace-pre-line leading-relaxed">{msg.text}</div>
-                  </div>
-                ))
-              )}
+          {/* PANEL 3 (BOTTOM): LAYERS & OPACITY DOCK */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="h-6 bg-[#262626] border-b border-[#1c1c1c] px-2 flex items-center justify-between text-[11px] text-zinc-400 shrink-0">
+              <span className="font-semibold text-white">Layers</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Channels | Paths</span>
             </div>
 
-            <div className="p-4 bg-[#09090b] border-t border-[#1c1d22]">
-              <form onSubmit={handleSendPrompt} className="max-w-3xl mx-auto flex items-center gap-2">
-                <input
-                  type="text"
-                  value={promptInput}
-                  onChange={(e) => setPromptInput(e.target.value)}
-                  placeholder="Ketik instruksi naskah, timing, atau kode video..."
-                  className="flex-1 px-3 py-2 bg-[#121316] border border-[#222328] rounded-lg text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400"
-                />
-                <button
-                  type="submit"
-                  disabled={isAiGenerating || !promptInput.trim()}
-                  className="px-4 py-2 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-xs disabled:opacity-40"
+            {/* Blend Mode & Opacity Sliders */}
+            <div className="p-2 border-b border-[#202020] space-y-1.5 text-[11px]">
+              <div className="flex items-center justify-between">
+                <select
+                  value={blendMode}
+                  onChange={(e) => setBlendMode(e.target.value)}
+                  className="bg-[#202020] border border-[#3e3e3e] rounded px-1.5 py-0.5 text-zinc-300 text-[10.5px]"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                </button>
-              </form>
+                  <option value="normal">Normal</option>
+                  <option value="multiply">Multiply</option>
+                  <option value="screen">Screen</option>
+                  <option value="overlay">Overlay</option>
+                </select>
+
+                <div className="flex items-center gap-1 font-mono text-[10.5px]">
+                  <span className="text-zinc-400">Opacity:</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={layerOpacity}
+                    onChange={(e) => setLayerOpacity(parseInt(e.target.value, 10))}
+                    className="w-14 accent-[#3879d9]"
+                  />
+                  <span className="w-6 text-right text-white">{layerOpacity}%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Layer Items List */}
+            <div className="flex-1 overflow-y-auto p-1.5 space-y-1 text-xs">
+              
+              {/* Layer 1: Uploaded Media */}
+              {uploadedMedia && (
+                <div className="p-1.5 rounded bg-[#202020] border border-[#383838] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setMediaVisible(!mediaVisible)}
+                      className="text-zinc-400 hover:text-white"
+                    >
+                      {mediaVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-600" />}
+                    </button>
+                    <div className="w-5 h-5 bg-black border border-zinc-700 flex items-center justify-center text-[9px] font-mono">
+                      {uploadedMedia.type === 'video' ? 'MP4' : 'IMG'}
+                    </div>
+                    <span className="font-mono text-zinc-200 text-[11px] truncate max-w-[120px]">
+                      {uploadedMedia.name}
+                    </span>
+                  </div>
+                  <button onClick={handleClearMedia} className="text-zinc-500 hover:text-rose-400">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
+              {/* Layer 2: Text Layer */}
+              {customText && (
+                <div className="p-1.5 rounded bg-[#202020] border border-[#383838] flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setTextVisible(!textVisible)}
+                      className="text-zinc-400 hover:text-white"
+                    >
+                      {textVisible ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5 text-zinc-600" />}
+                    </button>
+                    <div className="w-5 h-5 bg-[#181818] border border-zinc-700 flex items-center justify-center font-bold text-amber-400 text-[10px]">
+                      T
+                    </div>
+                    <span className="font-mono text-zinc-200 text-[11px] truncate max-w-[120px]">
+                      {customText}
+                    </span>
+                  </div>
+                  <button onClick={() => setCustomText('')} className="text-zinc-500 hover:text-rose-400">
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+
+              {/* Layer 3: Solid Black Background Layer (Selalu Ada) */}
+              <div className="p-1.5 rounded bg-[#1e1e1e] border border-[#2b2b2b] flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Eye className="w-3.5 h-3.5 text-zinc-500" />
+                  <div className="w-5 h-5 bg-black border border-zinc-700 flex items-center justify-center"></div>
+                  <span className="font-mono text-zinc-400 text-[11px]">
+                    Background (Black Solid)
+                  </span>
+                </div>
+                <Lock className="w-3 h-3 text-zinc-600" />
+              </div>
+
+            </div>
+
+            {/* Bottom Layer Action Icons */}
+            <div className="h-6 bg-[#262626] border-t border-[#1c1c1c] px-2 flex items-center justify-end gap-2 text-zinc-400 text-[11px] shrink-0">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                title="Create New Layer / Import Media"
+                className="hover:text-white"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
+              <button 
+                onClick={handleClearMedia}
+                title="Delete Layer"
+                className="hover:text-rose-400"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
-        )}
 
-        {/* --- MAIN REMOTION STUDIO PLAYER (CANVAS + TIMELINE + INSPECTOR) --- */}
-        {activeTab === 'player' && (
-          <>
-            {/* 1. LEFT PRIMARY SIDEBAR (EXPLORER & MEDIA ASSETS) */}
-            {!isLeftCollapsed ? (
-              <aside
-                style={{ width: `${leftWidth}px` }}
-                className="h-full bg-[#0d0e12] border-r border-[#1c1d22] flex flex-col shrink-0 select-none overflow-hidden z-20"
-              >
-                {/* Header Left Sidebar */}
-                <div className="h-8 border-b border-[#1c1d22] px-3 flex items-center justify-between text-xs text-zinc-400 shrink-0">
-                  <span className="font-semibold text-white tracking-wide uppercase text-[10px]">
-                    Explorer &amp; Media Assets
-                  </span>
-                  <button
-                    onClick={() => setIsLeftCollapsed(true)}
-                    className="p-1 rounded hover:bg-[#18191f] text-zinc-500 hover:text-white cursor-pointer"
-                    title="Tutup Panel Kiri"
-                  >
-                    <ChevronLeft className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Upload Button */}
-                <div className="p-2.5 border-b border-[#1c1d22]">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleMediaFileChange}
-                    accept="image/*,video/*"
-                    className="hidden"
-                  />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full py-1.5 px-2 bg-[#16171d] hover:bg-[#1e1f26] border border-[#26272e] rounded-lg text-xs text-zinc-200 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <Upload className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Import Media (Foto/Video)</span>
-                  </button>
-                </div>
-
-                {/* Tree / Asset List */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-1 text-xs">
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider px-2 py-1 font-semibold">
-                    Composition Files
-                  </div>
-                  <div className="px-2 py-1.5 rounded bg-[#16171d] text-amber-400 font-mono text-[11px] flex items-center gap-2 border border-[#23242b]">
-                    <FileText className="w-3.5 h-3.5" />
-                    <span>BrandIntro_4K.tsx</span>
-                  </div>
-
-                  <div className="text-[10px] text-zinc-500 uppercase tracking-wider px-2 py-1 font-semibold pt-2">
-                    Media Aktif
-                  </div>
-                  {uploadedMedia ? (
-                    <div className="p-2 rounded bg-[#121317] border border-[#1e1f25] space-y-1">
-                      <div className="flex items-center justify-between">
-                        <span className="font-mono text-zinc-300 text-[11px] truncate max-w-[140px]">
-                          {uploadedMedia.name}
-                        </span>
-                        <button
-                          onClick={handleClearMedia}
-                          className="text-zinc-500 hover:text-rose-400"
-                          title="Hapus Media"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
-                      </div>
-                      <div className="text-[10px] text-zinc-500 font-mono">
-                        Tipe: {uploadedMedia.type.toUpperCase()}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="px-2 py-2 text-[11px] text-zinc-500 italic">
-                      Belum ada media di-upload. Klik tombol import di atas.
-                    </div>
-                  )}
-                </div>
-              </aside>
-            ) : (
-              <div className="w-7 h-full bg-[#09090b] border-r border-[#1c1d22] flex flex-col items-center py-2 shrink-0 z-20">
-                <button
-                  onClick={() => setIsLeftCollapsed(false)}
-                  title="Buka Explorer"
-                  className="p-1 rounded text-zinc-500 hover:text-white hover:bg-[#121316] cursor-pointer"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-
-            {/* Splitter Kiri */}
-            {!isLeftCollapsed && (
-              <div
-                onMouseDown={handleStartDragLeft}
-                className="w-1 bg-[#141519] hover:bg-amber-400/60 transition-colors cursor-col-resize shrink-0 z-20"
-                title="Tarik untuk mengubah lebar"
-              />
-            )}
-
-            {/* 2. CENTER WORKSPACE: VIEWPORT & TIMELINE */}
-            <main className="flex-1 h-full flex flex-col overflow-hidden bg-[#07080a]">
-              
-              {/* TOP TAB BAR & CONTROLS */}
-              <div className="h-8 bg-[#09090b] border-b border-[#1c1d22] flex items-center justify-between px-3 text-xs shrink-0 select-none">
-                <div className="flex items-center gap-1">
-                  <div className="px-3 py-1 rounded-t bg-[#07080a] text-amber-400 border-t-2 border-amber-400 font-mono font-medium flex items-center gap-1.5">
-                    <Film className="w-3.5 h-3.5" />
-                    <span>Composition.tsx (Preview)</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 font-mono text-[11px]">
-                  <select
-                    value={aspectRatio}
-                    onChange={(e) => setAspectRatio(e.target.value)}
-                    className="bg-[#121316] border border-[#222328] rounded px-2 py-0.5 text-zinc-300 focus:outline-none"
-                  >
-                    <option value="16:9">16:9 Landscape</option>
-                    <option value="9:16">9:16 Shorts</option>
-                  </select>
-
-                  <select
-                    value={canvasZoom}
-                    onChange={(e) => setCanvasZoom(e.target.value)}
-                    className="bg-[#121316] border border-[#222328] rounded px-2 py-0.5 text-zinc-300 focus:outline-none"
-                  >
-                    <option value="fit">Fit</option>
-                    <option value="50">50%</option>
-                    <option value="100">100%</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* REMOTION CANVAS VIEWPORT */}
-              <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden bg-[#08090c]">
-                <div
-                  className={`relative bg-black border border-[#202126] shadow-2xl overflow-hidden flex items-center justify-center transition-all ${
-                    aspectRatio === '16:9' ? 'aspect-video w-full max-w-4xl max-h-[75%]' : 'aspect-[9/16] h-full max-h-[85%]'
-                  }`}
-                >
-                  {/* SAFE ZONE GUIDES (After Effects Style) */}
-                  <div className="absolute inset-4 border border-zinc-800/40 pointer-events-none z-10"></div>
-                  <div className="absolute inset-8 border border-zinc-900/40 pointer-events-none z-10"></div>
-
-                  {/* LAYER 1: UPLOADED MEDIA (FOTO ATAU VIDEO) */}
-                  {uploadedMedia ? (
-                    <div
-                      style={{
-                        transform: `translate(${mediaPosX}px, ${mediaPosY}px) scale(${mediaScale / 100}) rotate(${mediaRotation}deg)`,
-                        opacity: mediaOpacity / 100,
-                        filter:
-                          mediaFilter === 'dim' ? 'brightness(0.6)' :
-                          mediaFilter === 'contrast' ? 'contrast(1.4)' :
-                          mediaFilter === 'grayscale' ? 'grayscale(1)' : 'none'
-                      }}
-                      className="absolute inset-0 flex items-center justify-center transition-transform duration-75"
-                    >
-                      {uploadedMedia.type === 'video' ? (
-                        <video
-                          ref={videoElementRef}
-                          src={uploadedMedia.url}
-                          loop
-                          muted={isMuted}
-                          playsInline
-                          className="w-full h-full object-contain"
-                        />
-                      ) : (
-                        <img
-                          src={uploadedMedia.url}
-                          alt="Uploaded Canvas Media"
-                          className="w-full h-full object-contain"
-                        />
-                      )}
-                    </div>
-                  ) : (
-                    /* Default Clean Canvas State */
-                    <div className="flex flex-col items-center justify-center text-center p-6 space-y-2 select-none">
-                      {showLogoOnCanvas && <ClockLogo size={56} />}
-                      <h2
-                        style={{
-                          color: textColor,
-                          transform: `translate(${textPosX}px, ${textPosY}px) scale(${textScale / 100})`,
-                          opacity: textOpacity / 100
-                        }}
-                        className="text-2xl font-black tracking-tight"
-                      >
-                        {headlineText}
-                      </h2>
-                      <p className="text-xs text-zinc-400 max-w-md">{subtitleText}</p>
-                    </div>
-                  )}
-
-                  {/* LAYER 2: TEXT OVERLAY (Bisa Muncul di Atas Media) */}
-                  {uploadedMedia && (
-                    <div
-                      style={{
-                        transform: `translate(${textPosX}px, ${textPosY}px) scale(${textScale / 100})`,
-                        opacity: textOpacity / 100,
-                        color: textColor
-                      }}
-                      className="absolute z-20 text-center px-4 pointer-events-none"
-                    >
-                      <h2 className="text-xl font-bold tracking-tight drop-shadow-md">{headlineText}</h2>
-                      <p className="text-xs text-zinc-300 drop-shadow">{subtitleText}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* REMOTION TRANSPORT CONTROLS (PLAY/PAUSE & TIMECODE) */}
-              <div className="h-9 bg-[#09090b] border-t border-[#1c1d22] px-3 flex items-center justify-between text-xs shrink-0 select-none">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setCurrentFrame(0)}
-                    className="p-1 rounded hover:bg-[#16171d] text-zinc-400 hover:text-white"
-                    title="Rewind (Frame 0)"
-                  >
-                    <SkipBack className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={() => setIsPlaying(!isPlaying)}
-                    className="px-2.5 py-1 rounded bg-amber-400 hover:bg-amber-300 text-zinc-950 font-bold flex items-center gap-1 cursor-pointer"
-                  >
-                    {isPlaying ? <Pause className="w-3.5 h-3.5 fill-zinc-950" /> : <Play className="w-3.5 h-3.5 fill-zinc-950" />}
-                    <span>{isPlaying ? 'Pause' : 'Play'}</span>
-                  </button>
-
-                  <button
-                    onClick={() => setCurrentFrame(maxFrames)}
-                    className="p-1 rounded hover:bg-[#16171d] text-zinc-400 hover:text-white"
-                    title="Forward (Frame Akhir)"
-                  >
-                    <SkipForward className="w-3.5 h-3.5" />
-                  </button>
-
-                  <button
-                    onClick={handleSplitClipAtPlayhead}
-                    className="p-1.5 rounded hover:bg-[#16171d] text-zinc-400 hover:text-amber-400 transition-colors ml-2"
-                    title="Potong Clip pada Playhead (Scissors / Split)"
-                  >
-                    <Scissors className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                <div className="font-mono text-zinc-300 text-[11px] flex items-center gap-2">
-                  <span className="text-amber-400 font-semibold">{formatTimecode(currentFrame)}</span>
-                  <span className="text-zinc-600">/</span>
-                  <span className="text-zinc-500">{formatTimecode(maxFrames)}</span>
-                  <span className="px-1.5 py-0.5 rounded bg-[#14151a] border border-[#202126] text-[10px] text-zinc-400">
-                    60 FPS
-                  </span>
-                </div>
-              </div>
-
-              {/* Splitter Bawah */}
-              {!isBottomCollapsed && (
-                <div
-                  onMouseDown={handleStartDragBottom}
-                  className="h-1 bg-[#141519] hover:bg-amber-400/60 transition-colors cursor-row-resize shrink-0 z-20"
-                  title="Tarik untuk mengubah tinggi timeline"
-                />
-              )}
-
-              {/* 3. BOTTOM PANEL (MULTI-TRACK TIMELINE & CONSOLE) */}
-              {!isBottomCollapsed ? (
-                <div
-                  style={{ height: `${bottomHeight}px` }}
-                  className="bg-[#0b0c0f] border-t border-[#1c1d22] flex flex-col shrink-0 overflow-hidden z-10"
-                >
-                  {/* Bottom Header Tabs */}
-                  <div className="h-7 bg-[#09090b] border-b border-[#1c1d22] px-3 flex items-center justify-between text-xs text-zinc-400 shrink-0">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setBottomTab('timeline')}
-                        className={`font-semibold transition-colors ${bottomTab === 'timeline' ? 'text-amber-400' : 'hover:text-white'}`}
-                      >
-                        Multi-Track Timeline
-                      </button>
-                      <span className="text-zinc-700">|</span>
-                      <button
-                        onClick={() => setBottomTab('console')}
-                        className={`font-semibold transition-colors ${bottomTab === 'console' ? 'text-amber-400' : 'hover:text-white'}`}
-                      >
-                        Output / Terminal
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => setIsBottomCollapsed(true)}
-                      className="p-1 rounded hover:bg-[#16171d] text-zinc-500 hover:text-white cursor-pointer"
-                      title="Tutup Timeline"
-                    >
-                      <ChevronDown className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Timeline Scrubber & Tracks */}
-                  {bottomTab === 'timeline' ? (
-                    <div className="flex-1 flex flex-col overflow-hidden">
-                      {/* Timeline Ruler */}
-                      <div
-                        ref={timelineRulerRef}
-                        onClick={handleTimelineScrub}
-                        className="h-6 bg-[#0e0f13] border-b border-[#1c1d22] relative cursor-pointer select-none"
-                      >
-                        {/* Playhead Marker */}
-                        <div
-                          style={{ left: `${(currentFrame / maxFrames) * 100}%` }}
-                          className="absolute top-0 bottom-0 w-0.5 bg-amber-400 z-30 pointer-events-none"
-                        >
-                          <div className="w-2.5 h-2.5 bg-amber-400 rotate-45 -ml-1 -mt-1"></div>
-                        </div>
-                        {/* Ruler ticks */}
-                        <div className="flex justify-between px-3 text-[9px] font-mono text-zinc-600 pt-1 pointer-events-none">
-                          <span>00:00</span>
-                          <span>00:01</span>
-                          <span>00:02</span>
-                          <span>00:03 (180f)</span>
-                        </div>
-                      </div>
-
-                      {/* Tracks Area */}
-                      <div className="flex-1 overflow-y-auto p-2 space-y-1.5">
-                        {/* Video Track */}
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 text-[10px] font-mono text-zinc-400 truncate">V1 (Video)</div>
-                          <div className="flex-1 h-7 bg-[#121317] rounded border border-[#1e1f25] relative overflow-hidden flex items-center px-2">
-                            {videoClips.map((clip) => (
-                              <div
-                                key={clip.id}
-                                className="h-5 px-2 rounded bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-200 font-mono flex items-center truncate cursor-pointer hover:border-amber-400"
-                              >
-                                {clip.name}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Text Track */}
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 text-[10px] font-mono text-zinc-400 truncate">T1 (Teks)</div>
-                          <div className="flex-1 h-7 bg-[#121317] rounded border border-[#1e1f25] relative flex items-center px-2">
-                            <div className="h-5 px-2 rounded bg-amber-950/40 border border-amber-800/50 text-[10px] text-amber-300 font-mono flex items-center truncate">
-                              {headlineText}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Audio Track */}
-                        <div className="flex items-center gap-2">
-                          <div className="w-20 text-[10px] font-mono text-zinc-400 truncate">A1 (Audio)</div>
-                          <div className="flex-1 h-7 bg-[#121317] rounded border border-[#1e1f25] relative flex items-center px-2">
-                            <div className="h-5 px-2 rounded bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-500 font-mono flex items-center truncate">
-                              Background_Beat_120BPM.wav
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Console Output */
-                    <div className="flex-1 p-3 font-mono text-[11px] text-zinc-400 overflow-y-auto space-y-1 bg-[#08090c]">
-                      <div className="text-emerald-400">[Remotion Engine] WebCodecs GPU context initialized (60 FPS).</div>
-                      <div>[Render Engine] Zero modal pop-up architecture active.</div>
-                      <div>[BYOA Engine] Multi-LLM provider registry ready.</div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div className="h-6 bg-[#09090b] border-t border-[#1c1d22] px-3 flex items-center justify-between text-[11px] text-zinc-500 shrink-0">
-                  <span>Timeline Ditutup</span>
-                  <button
-                    onClick={() => setIsBottomCollapsed(false)}
-                    className="hover:text-white flex items-center gap-1 cursor-pointer"
-                  >
-                    <span>Buka Timeline</span>
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-            </main>
-
-            {/* Splitter Kanan */}
-            {!isRightCollapsed && (
-              <div
-                onMouseDown={handleStartDragRight}
-                className="w-1 bg-[#141519] hover:bg-amber-400/60 transition-colors cursor-col-resize shrink-0 z-20"
-                title="Tarik untuk mengubah lebar inspector"
-              />
-            )}
-
-            {/* 3. RIGHT SIDEBAR (AFTER EFFECTS STYLE INSPECTOR & PROPERTIES) */}
-            {!isRightCollapsed ? (
-              <aside
-                style={{ width: `${rightWidth}px` }}
-                className="h-full bg-[#0d0e12] border-l border-[#1c1d22] flex flex-col shrink-0 select-none overflow-hidden z-20"
-              >
-                {/* Header Right Sidebar */}
-                <div className="h-8 border-b border-[#1c1d22] px-3 flex items-center justify-between text-xs text-zinc-400 shrink-0">
-                  <span className="font-semibold text-white tracking-wide uppercase text-[10px]">
-                    Inspector Properti
-                  </span>
-                  <button
-                    onClick={() => setIsRightCollapsed(true)}
-                    className="p-1 rounded hover:bg-[#18191f] text-zinc-500 hover:text-white cursor-pointer"
-                    title="Tutup Panel Kanan"
-                  >
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-
-                {/* Layer Selector */}
-                <div className="flex border-b border-[#1c1d22] bg-[#09090b] text-xs">
-                  <button
-                    onClick={() => setActiveLayer('media')}
-                    className={`flex-1 py-1.5 font-medium transition-colors ${
-                      activeLayer === 'media' ? 'text-amber-400 border-b border-amber-400 bg-[#0d0e12]' : 'text-zinc-500 hover:text-zinc-200'
-                    }`}
-                  >
-                    Media (File)
-                  </button>
-                  <button
-                    onClick={() => setActiveLayer('text')}
-                    className={`flex-1 py-1.5 font-medium transition-colors ${
-                      activeLayer === 'text' ? 'text-amber-400 border-b border-amber-400 bg-[#0d0e12]' : 'text-zinc-500 hover:text-zinc-200'
-                    }`}
-                  >
-                    Teks Overlay
-                  </button>
-                </div>
-
-                {/* Inspector Controls */}
-                <div className="flex-1 overflow-y-auto p-3 space-y-4 text-xs">
-                  {activeLayer === 'media' && (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between border-b border-[#1c1d22] pb-1.5">
-                        <span className="font-semibold text-white text-[11px]">Transformasi Media</span>
-                        {uploadedMedia && (
-                          <button
-                            onClick={handleClearMedia}
-                            className="text-[10px] text-rose-400 hover:underline"
-                          >
-                            Hapus
-                          </button>
-                        )}
-                      </div>
-
-                      {/* Skala / Zoom */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Skala (Zoom):</span>
-                          <span className="font-mono text-white">{mediaScale}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="20"
-                          max="250"
-                          value={mediaScale}
-                          onChange={(e) => setMediaScale(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Posisi X */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Posisi X (px):</span>
-                          <span className="font-mono text-white">{mediaPosX} px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-300"
-                          max="300"
-                          value={mediaPosX}
-                          onChange={(e) => setMediaPosX(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Posisi Y */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Posisi Y (px):</span>
-                          <span className="font-mono text-white">{mediaPosY} px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-300"
-                          max="300"
-                          value={mediaPosY}
-                          onChange={(e) => setMediaPosY(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Rotasi */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Rotasi (°):</span>
-                          <span className="font-mono text-white">{mediaRotation}°</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-180"
-                          max="180"
-                          value={mediaRotation}
-                          onChange={(e) => setMediaRotation(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Opasitas */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Opasitas (%):</span>
-                          <span className="font-mono text-white">{mediaOpacity}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={mediaOpacity}
-                          onChange={(e) => setMediaOpacity(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Filter Visual */}
-                      <div className="space-y-1 pt-2 border-t border-[#1c1d22]">
-                        <label className="text-[11px] text-zinc-400">Filter Visual After Effects:</label>
-                        <select
-                          value={mediaFilter}
-                          onChange={(e) => setMediaFilter(e.target.value)}
-                          className="w-full bg-[#09090b] border border-[#222328] rounded p-1.5 text-xs text-white"
-                        >
-                          <option value="none">Normal (Tanpa Filter)</option>
-                          <option value="dim">Dimmed Cinematic</option>
-                          <option value="contrast">High Contrast</option>
-                          <option value="grayscale">Monokrom / Hitam Putih</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeLayer === 'text' && (
-                    <div className="space-y-3">
-                      <div className="border-b border-[#1c1d22] pb-1.5">
-                        <span className="font-semibold text-white text-[11px]">Tipografi &amp; Teks</span>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] text-zinc-400">Judul Headline:</label>
-                        <input
-                          type="text"
-                          value={headlineText}
-                          onChange={(e) => setHeadlineText(e.target.value)}
-                          className="w-full bg-[#09090b] border border-[#222328] rounded p-1.5 text-xs text-white"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="text-[11px] text-zinc-400">Sub-Headline:</label>
-                        <input
-                          type="text"
-                          value={subtitleText}
-                          onChange={(e) => setSubtitleText(e.target.value)}
-                          className="w-full bg-[#09090b] border border-[#222328] rounded p-1.5 text-xs text-white"
-                        />
-                      </div>
-
-                      {/* Skala Teks */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Ukuran Skala:</span>
-                          <span className="font-mono text-white">{textScale}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="50"
-                          max="200"
-                          value={textScale}
-                          onChange={(e) => setTextScale(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-
-                      {/* Posisi Y Teks */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] text-zinc-400">
-                          <span>Offset Vertikal (Y):</span>
-                          <span className="font-mono text-white">{textPosY} px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="-200"
-                          max="200"
-                          value={textPosY}
-                          onChange={(e) => setTextPosY(parseInt(e.target.value, 10))}
-                          className="w-full accent-amber-400"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </aside>
-            ) : (
-              <div className="w-7 h-full bg-[#09090b] border-l border-[#1c1d22] flex flex-col items-center py-2 shrink-0 z-20">
-                <button
-                  onClick={() => setIsRightCollapsed(false)}
-                  title="Buka Inspector"
-                  className="p-1 rounded text-zinc-500 hover:text-white hover:bg-[#121316] cursor-pointer"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        </aside>
 
       </div>
 
-      {/* 2. BOTTOM STATUS BAR (VS CODE 22px BAR) */}
-      <footer className="h-[22px] bg-[#09090b] border-t border-[#1c1d22] flex items-center justify-between px-3 text-[10px] text-zinc-500 select-none shrink-0 z-30 font-mono">
-        <div className="flex items-center gap-3">
-          <span className="text-zinc-400 flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-            git: main
-          </span>
-          <span>0 Errors</span>
-          <span>0 Warnings</span>
+      {/* 2. FUNCTIONAL BOTTOM BAR: TIMELINE, SLIDE FRAME, CUT FRAME, EDIT FRAME DETAIL */}
+      {/* "lalu bar dbawahnya fungsikan, agar saya bisa slide frae nya, cut framenya, edit frame nya secara detail" */}
+      <footer
+        style={{ height: isTimelineExpanded ? `${timelineHeight}px` : '26px' }}
+        className="bg-[#262626] border-t border-[#1a1a1a] flex flex-col shrink-0 select-none z-40 transition-all duration-150"
+      >
+        {/* TIMELINE TITLE TAB BAR (Photoshop / Premiere Style) */}
+        <div className="h-6 bg-[#2b2b2b] border-b border-[#1c1c1c] px-2 flex items-center justify-between text-[11px] text-[#b0b0b0] shrink-0">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => { setBottomDockTab('timeline'); setIsTimelineExpanded(true); }}
+              className={`font-semibold flex items-center gap-1 ${bottomDockTab === 'timeline' ? 'text-white border-b-2 border-[#3879d9]' : 'hover:text-white'}`}
+            >
+              <Film className="w-3 h-3 text-amber-400" />
+              <span>Timeline</span>
+            </button>
+            <span className="text-zinc-700">|</span>
+            <button
+              onClick={() => { setBottomDockTab('minibridge'); setIsTimelineExpanded(true); }}
+              className={`font-semibold ${bottomDockTab === 'minibridge' ? 'text-white border-b-2 border-[#3879d9]' : 'hover:text-white'}`}
+            >
+              Mini Bridge (Assets)
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 font-mono text-[10.5px]">
+            {/* Direct Frame Input (Bisa Ketik Frame Langsung) */}
+            <div className="flex items-center gap-1">
+              <span>Frame:</span>
+              <input
+                type="number"
+                min="0"
+                max={maxFrames}
+                value={currentFrame}
+                onChange={(e) => {
+                  const val = parseInt(e.target.value, 10);
+                  if (!isNaN(val)) setCurrentFrame(Math.max(0, Math.min(val, maxFrames)));
+                }}
+                className="w-11 bg-[#1a1a1a] border border-[#3e3e3e] px-1 py-0.2 rounded text-white text-center font-bold"
+              />
+              <span>/ {maxFrames}</span>
+            </div>
+
+            <span className="text-zinc-600">|</span>
+            <span className="text-amber-400 font-bold">{formatTimecode(currentFrame)}</span>
+
+            <button
+              onClick={() => setIsTimelineExpanded(!isTimelineExpanded)}
+              className="p-0.5 hover:text-white"
+              title={isTimelineExpanded ? 'Minimize Timeline' : 'Expand Timeline'}
+            >
+              {isTimelineExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronUp className="w-3 h-3" />}
+            </button>
+          </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-3">
-          <span>Remotion Engine v3.3</span>
-          <span>60 FPS</span>
-          <span>4K UHD (3840x2160)</span>
-          <span className="text-amber-400">Zero-Modal Spec</span>
-        </div>
+        {isTimelineExpanded && (
+          <div className="flex-1 flex flex-col overflow-hidden bg-[#202020]">
+            
+            {/* TIMELINE TOOLBAR (PLAY, PAUSE, SLIDE, CUT, STEP, KEYFRAME) */}
+            <div className="h-7 bg-[#262626] border-b border-[#1c1c1c] px-2 flex items-center justify-between text-xs shrink-0">
+              
+              {/* Transport Buttons */}
+              <div className="flex items-center gap-1">
+                {/* Go to Start */}
+                <button
+                  onClick={() => setCurrentFrame(0)}
+                  className="p-1 rounded hover:bg-[#333333] text-zinc-300 hover:text-white cursor-pointer"
+                  title="Ke Awal (Frame 0)"
+                >
+                  <SkipBack className="w-3.5 h-3.5" />
+                </button>
 
-        <div className="flex items-center gap-3">
-          <span className="text-zinc-400">BYOA: Gemini 2.0 Flash</span>
-          <span>UTF-8</span>
-        </div>
+                {/* Step -1 Frame */}
+                <button
+                  onClick={() => setCurrentFrame((prev) => Math.max(0, prev - 1))}
+                  className="px-1.5 py-0.5 rounded bg-[#202020] hover:bg-[#333333] border border-[#3a3a3a] text-[10.5px] font-mono cursor-pointer"
+                  title="Mundur 1 Frame (-1f)"
+                >
+                  -1f
+                </button>
+
+                {/* PLAY / PAUSE BUTTON */}
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="px-2.5 py-0.5 rounded bg-[#3879d9] hover:bg-[#4a8df0] text-white font-bold flex items-center gap-1 cursor-pointer shadow-sm text-[11px]"
+                >
+                  {isPlaying ? <Pause className="w-3 h-3 fill-white" /> : <Play className="w-3 h-3 fill-white" />}
+                  <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                </button>
+
+                {/* Step +1 Frame */}
+                <button
+                  onClick={() => setCurrentFrame((prev) => Math.min(maxFrames, prev + 1))}
+                  className="px-1.5 py-0.5 rounded bg-[#202020] hover:bg-[#333333] border border-[#3a3a3a] text-[10.5px] font-mono cursor-pointer"
+                  title="Maju 1 Frame (+1f)"
+                >
+                  +1f
+                </button>
+
+                {/* Go to End */}
+                <button
+                  onClick={() => setCurrentFrame(maxFrames)}
+                  className="p-1 rounded hover:bg-[#333333] text-zinc-300 hover:text-white cursor-pointer"
+                  title="Ke Akhir (Frame 180)"
+                >
+                  <SkipForward className="w-3.5 h-3.5" />
+                </button>
+
+                <div className="h-4 w-px bg-[#3e3e3e] mx-1"></div>
+
+                {/* --- CUT FRAME BUTTON (GUNTING CLIP PADA PLAYHEAD) --- */}
+                <button
+                  onClick={handleCutFrameAtPlayhead}
+                  className="px-2 py-0.5 rounded bg-[#2d3238] hover:bg-[#3d4550] border border-[#4d5663] text-white font-semibold flex items-center gap-1 text-[11px] cursor-pointer"
+                  title="Cut Frame (Pisahkan Clip pada Posisi Playhead) [C / Ctrl+B]"
+                >
+                  <Scissors className="w-3 h-3 text-amber-400" />
+                  <span>Cut Frame</span>
+                </button>
+
+                {/* --- ADD / REMOVE KEYFRAME BUTTON --- */}
+                <button
+                  onClick={handleToggleKeyframeAtCurrent}
+                  className={`px-2 py-0.5 rounded border text-[11px] font-mono flex items-center gap-1 cursor-pointer transition-colors ${
+                    keyframePoints.includes(currentFrame)
+                      ? 'bg-amber-950/70 border-amber-600 text-amber-300 font-bold'
+                      : 'bg-[#202020] border-[#3a3a3a] text-zinc-300 hover:text-white'
+                  }`}
+                  title="Toggle Keyframe pada Frame Ini"
+                >
+                  <Diamond className="w-2.5 h-2.5 fill-current" />
+                  <span>{keyframePoints.includes(currentFrame) ? 'Keyframe Aktif' : '+ Keyframe'}</span>
+                </button>
+              </div>
+
+              {/* Right Toolbar: Zoom & Frame Detail Toggle */}
+              <div className="flex items-center gap-2 font-mono text-[10.5px] text-zinc-400">
+                <span>Zoom:</span>
+                <input
+                  type="range"
+                  min="50"
+                  max="250"
+                  value={timelineZoom}
+                  onChange={(e) => setTimelineZoom(parseInt(e.target.value, 10))}
+                  className="w-16 accent-[#3879d9]"
+                />
+                <button
+                  onClick={() => setShowFrameDetailModal(!showFrameDetailModal)}
+                  className={`px-1.5 py-0.5 rounded border text-[10.5px] font-sans ${showFrameDetailModal ? 'bg-[#3879d9] text-white border-[#3879d9]' : 'border-[#3a3a3a] text-zinc-300 hover:text-white'}`}
+                >
+                  Detail Frame
+                </button>
+              </div>
+
+            </div>
+
+            {/* TIMELINE RULER & CLIPS TRACK AREA */}
+            <div className="flex-1 flex overflow-hidden">
+              
+              {/* TRACK HEADERS (LEFT) */}
+              <div className="w-36 bg-[#232323] border-r border-[#1c1c1c] flex flex-col shrink-0 text-[10.5px] font-mono text-zinc-400 divide-y divide-[#1c1c1c]">
+                <div className="h-6 px-2 flex items-center justify-between bg-[#282828] text-zinc-300 font-sans font-semibold">
+                  <span>Track ID</span>
+                  <span>M / S</span>
+                </div>
+                <div className="h-10 px-2 flex items-center justify-between bg-[#232323]">
+                  <span>V1: Video Layer</span>
+                  <div className="flex gap-1 text-[9px]">
+                    <span className="px-1 bg-[#1a1a1a] rounded text-zinc-400">V</span>
+                    <span className="px-1 bg-[#1a1a1a] rounded text-emerald-400">●</span>
+                  </div>
+                </div>
+                <div className="h-9 px-2 flex items-center justify-between bg-[#232323]">
+                  <span>T1: Text Overlay</span>
+                  <div className="flex gap-1 text-[9px]">
+                    <span className="px-1 bg-[#1a1a1a] rounded text-amber-400">T</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* INTERACTIVE TRACK TIMELINE (SCRUBBING & CLIPS) */}
+              <div className="flex-1 flex flex-col overflow-x-auto relative bg-[#181818]">
+                
+                {/* TIMELINE RULER (DENGAN DRAGGABLE PLAYHEAD SCRUBBER) */}
+                <div
+                  ref={timelineRulerRef}
+                  onClick={handleTimelineScrub}
+                  className="h-6 bg-[#252525] border-b border-[#1c1c1c] relative cursor-pointer select-none shrink-0"
+                >
+                  {/* Keyframe Markers on Ruler */}
+                  {keyframePoints.map((kf) => (
+                    <div
+                      key={kf}
+                      style={{ left: `${(kf / maxFrames) * 100}%` }}
+                      className="absolute top-1 -ml-1 text-amber-400 pointer-events-none"
+                      title={`Keyframe pada frame ${kf}`}
+                    >
+                      <Diamond className="w-2 h-2 fill-amber-400" />
+                    </div>
+                  ))}
+
+                  {/* DRAGGABLE PLAYHEAD */}
+                  <div
+                    style={{ left: `${(currentFrame / maxFrames) * 100}%` }}
+                    onMouseDown={handleStartPlayheadDrag}
+                    className="absolute top-0 bottom-0 w-0.5 bg-amber-400 z-30 cursor-ew-resize"
+                  >
+                    <div className="w-3 h-3 bg-amber-400 rotate-45 -ml-1.25 -mt-1 shadow-md hover:scale-125 transition-transform"></div>
+                  </div>
+
+                  {/* Frame Ticks (0, 30, 60, 90, 120, 150, 180) */}
+                  <div className="flex justify-between px-3 text-[9px] font-mono text-zinc-500 pt-1 pointer-events-none">
+                    <span>0f</span>
+                    <span>30f (0.5s)</span>
+                    <span>60f (1s)</span>
+                    <span>90f (1.5s)</span>
+                    <span>120f (2s)</span>
+                    <span>150f (2.5s)</span>
+                    <span>180f (3s)</span>
+                  </div>
+                </div>
+
+                {/* CLIPS RENDERING TRACKS */}
+                <div className="flex-1 p-2 space-y-2 overflow-y-auto">
+                  
+                  {/* Track 1: Video Clips (Bisa Dipotong & Di-trim) */}
+                  <div className="h-10 bg-[#1c1c1c] border border-[#2b2b2b] rounded-sm relative flex items-center px-1">
+                    {clips.map((c) => {
+                      const leftPct = (c.startFrame / maxFrames) * 100;
+                      const widthPct = ((c.endFrame - c.startFrame) / maxFrames) * 100;
+                      const isSelected = c.id === selectedClipId;
+
+                      return (
+                        <div
+                          key={c.id}
+                          onClick={() => setSelectedClipId(c.id)}
+                          style={{
+                            left: `${leftPct}%`,
+                            width: `${widthPct}%`
+                          }}
+                          className={`absolute h-8 rounded-sm border text-[10px] font-mono flex items-center justify-between px-1.5 cursor-pointer shadow transition-all ${
+                            c.color
+                          } ${isSelected ? 'ring-2 ring-amber-400 text-white' : 'text-zinc-300'}`}
+                        >
+                          {/* Left Trim Handle */}
+                          <div
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const newS = Math.max(0, currentFrame);
+                              handleTrimClipStart(c.id, newS);
+                            }}
+                            title="Tarik / Klik untuk Set In-Point ke Playhead"
+                            className="w-1.5 h-full bg-amber-400/80 -ml-1 cursor-col-resize hover:bg-amber-300"
+                          />
+
+                          <span className="truncate">{c.name} ({c.endFrame - c.startFrame}f)</span>
+
+                          {/* Right Trim Handle */}
+                          <div
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              const newE = Math.min(maxFrames, currentFrame);
+                              handleTrimClipEnd(c.id, newE);
+                            }}
+                            title="Tarik / Klik untuk Set Out-Point ke Playhead"
+                            className="w-1.5 h-full bg-amber-400/80 -mr-1 cursor-col-resize hover:bg-amber-300"
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Track 2: Text Overlay Track */}
+                  <div className="h-9 bg-[#1c1c1c] border border-[#2b2b2b] rounded-sm relative flex items-center px-2">
+                    {customText ? (
+                      <div className="h-6 w-full rounded-sm bg-[#4a3b2c] border border-amber-600/60 text-[10.5px] text-amber-200 font-mono flex items-center px-2 truncate">
+                        Teks: "{customText}" (Frame 0 - 180)
+                      </div>
+                    ) : (
+                      <div className="text-[10px] text-zinc-600 italic">
+                        Pilih Tool Type (T) di sebelah kiri untuk menambahkan teks ke timeline
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* --- SUB-PANEL EDIT FRAME DETAIL SECARA DETAIL --- */}
+              {showFrameDetailModal && selectedClip && (
+                <div className="w-56 bg-[#242424] border-l border-[#1c1c1c] p-2 flex flex-col shrink-0 text-[11px] font-sans space-y-2">
+                  <div className="flex items-center justify-between border-b border-[#333333] pb-1">
+                    <span className="font-bold text-white uppercase text-[10px] tracking-wider">
+                      Detail Frame Clip
+                    </span>
+                    <span className="font-mono text-amber-400 text-[10px]">{selectedClip.name}</span>
+                  </div>
+
+                  {/* In-Point (Start Frame) */}
+                  <div className="flex items-center justify-between font-mono text-[10.5px]">
+                    <span className="text-zinc-400">In-Point:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max={selectedClip.endFrame - 1}
+                      value={selectedClip.startFrame}
+                      onChange={(e) => handleTrimClipStart(selectedClip.id, parseInt(e.target.value, 10))}
+                      className="w-14 bg-[#181818] border border-[#3e3e3e] px-1 py-0.5 rounded text-white text-right"
+                    />
+                  </div>
+
+                  {/* Out-Point (End Frame) */}
+                  <div className="flex items-center justify-between font-mono text-[10.5px]">
+                    <span className="text-zinc-400">Out-Point:</span>
+                    <input
+                      type="number"
+                      min={selectedClip.startFrame + 1}
+                      max={maxFrames}
+                      value={selectedClip.endFrame}
+                      onChange={(e) => handleTrimClipEnd(selectedClip.id, parseInt(e.target.value, 10))}
+                      className="w-14 bg-[#181818] border border-[#3e3e3e] px-1 py-0.5 rounded text-white text-right"
+                    />
+                  </div>
+
+                  {/* Total Frame Duration */}
+                  <div className="flex items-center justify-between text-zinc-400 text-[10.5px]">
+                    <span>Durasi:</span>
+                    <span className="font-mono text-white">
+                      {selectedClip.endFrame - selectedClip.startFrame} frames (
+                      {((selectedClip.endFrame - selectedClip.startFrame) / fps).toFixed(2)}s)
+                    </span>
+                  </div>
+
+                  {/* Playback Speed */}
+                  <div className="flex items-center justify-between text-zinc-400 text-[10.5px]">
+                    <span>Speed:</span>
+                    <select
+                      value={selectedClip.speed || 1.0}
+                      onChange={(e) => handleSetClipSpeed(selectedClip.id, parseFloat(e.target.value))}
+                      className="bg-[#181818] border border-[#3e3e3e] rounded px-1 py-0.5 text-white font-mono"
+                    >
+                      <option value="0.5">0.5x (Slow)</option>
+                      <option value="1.0">1.0x (Normal)</option>
+                      <option value="1.5">1.5x (Fast)</option>
+                      <option value="2.0">2.0x (Double)</option>
+                    </select>
+                  </div>
+
+                  {/* Set In/Out to Playhead Shortcuts */}
+                  <div className="pt-1 border-t border-[#333333] flex gap-1">
+                    <button
+                      onClick={() => handleTrimClipStart(selectedClip.id, currentFrame)}
+                      className="flex-1 py-0.5 rounded bg-[#1c1c1c] hover:bg-[#333333] border border-[#383838] text-[9.5px] font-mono text-zinc-300"
+                    >
+                      Set In [
+                    </button>
+                    <button
+                      onClick={() => handleTrimClipEnd(selectedClip.id, currentFrame)}
+                      className="flex-1 py-0.5 rounded bg-[#1c1c1c] hover:bg-[#333333] border border-[#383838] text-[9.5px] font-mono text-zinc-300"
+                    >
+                      Set Out ]
+                    </button>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        )}
       </footer>
+
+      {/* 3. VERY BOTTOM STATUS BAR */}
+      <div className="h-[20px] bg-[#1a1a1a] border-t border-[#141414] px-2 flex items-center justify-between text-[10px] text-zinc-500 font-mono shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-400">Doc: 1920x1080 (16:9)</span>
+          <span>Scratch: 45.2M / 1.2G</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>Photoshop &amp; Motion Studio v1.0.1</span>
+          <span className="text-amber-400 font-bold">60 FPS Engine</span>
+        </div>
+      </div>
 
     </div>
   );
